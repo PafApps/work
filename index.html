@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <!-- Важно: Файлът трябва да бъде запазен с кодиране (Encoding) UTF-8 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пълен списък на AutoLISP команди с филтър</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 25px 35px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #1d3557;
+            border-bottom: 2px solid #457b9d;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #457b9d;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #a8dadc;
+        }
+        #alphabet-filter {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+        .filter-button {
+            background-color: #a8dadc;
+            color: #1d3557;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .filter-button:hover {
+            background-color: #457b9d;
+            color: white;
+        }
+        .filter-button.active {
+            background-color: #1d3557;
+            color: white;
+        }
+        .category.hidden, .command-entry.hidden {
+            display: none;
+        }
+        .command-entry {
+            margin-bottom: 8px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #e1e1e1;
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        .command-header {
+            display: flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .command-button {
+            background-color: #457b9d;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 15px;
+            transition: background-color 0.3s;
+            text-align: center;
+            font-weight: 500;
+            min-width: 200px;
+            text-transform: uppercase;
+        }
+        .command-header:hover .command-button, .command-button.active {
+            background-color: #1d3557;
+        }
+        .short-description {
+            margin-left: 15px;
+            font-size: 15px;
+            color: #555;
+            flex-grow: 1;
+        }
+        .full-description-panel {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            background-color: #f1faee;
+            color: #1d3557;
+            box-sizing: border-box;
+            transition: max-height 0.4s ease-out, opacity 0.3s ease-out, padding 0.4s ease-out;
+            padding: 0 15px;
+        }
+        .full-description-panel.show {
+            max-height: 200px;
+            opacity: 1;
+            padding: 15px;
+            transition: max-height 0.4s ease-in, opacity 0.3s ease-in, padding 0.4s ease-in;
+        }
+        .full-description-panel p { margin: 0; font-size: 14px; }
+        .alias-note { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin-top: 20px; }
+        .alias-button { background-color: #e63946; }
+        .alias-button:hover, .alias-button.active { background-color: #a8202b; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Интерактивен списък на AutoLISP команди</h1>
+
+        <div id="alphabet-filter">
+            <button class="filter-button active" data-filter="all">ВСИЧКИ</button>
+            <button class="filter-button" data-filter="A">A</button>
+            <button class="filter-button" data-filter="B">B</button>
+            <button class="filter-button" data-filter="C">C</button>
+            <button class="filter-button" data-filter="D">D</button>
+            <button class="filter-button" data-filter="E">E</button>
+            <button class="filter-button" data-filter="F">F</button>
+            <button class="filter-button" data-filter="G">G</button>
+            <button class="filter-button" data-filter="H">H</button>
+            <button class="filter-button" data-filter="I">I</button>
+            <button class="filter-button" data-filter="J">J</button>
+            <button class="filter-button" data-filter="K">K</button>
+            <button class="filter-button" data-filter="L">L</button>
+            <button class="filter-button" data-filter="M">M</button>
+            <button class="filter-button" data-filter="N">N</button>
+            <button class="filter-button" data-filter="O">O</button>
+            <button class="filter-button" data-filter="P">P</button>
+            <button class="filter-button" data-filter="Q">Q</button>
+            <button class="filter-button" data-filter="R">R</button>
+            <button class="filter-button" data-filter="S">S</button>
+            <button class="filter-button" data-filter="T">T</button>
+            <button class="filter-button" data-filter="U">U</button>
+            <button class="filter-button" data-filter="V">V</button>
+            <button class="filter-button" data-filter="W">W</button>
+            <button class="filter-button" data-filter="X">X</button>
+            <button class="filter-button" data-filter="Y">Y</button>
+            <button class="filter-button" data-filter="Z">Z</button>
+        </div>
+
+        <div class="category" data-category="main-interface">
+            <h2>Основен интерфейс</h2>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">PPS</button><span class="short-description">Основен диалогов прозорец.</span></div><div class="full-description-panel"><p>Извиква главния диалогов прозорец 'PAF Page Setups' (PPS), който служи като централен хъб за достъп до повечето други команди.</p></div></div>
+        </div>
+
+        <div class="category" data-category="layout-plotting">
+            <h2>Управление на лейаути и плотиране</h2>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">Layouts</button><span class="short-description">Създаване на лейаут.</span></div><div class="full-description-panel"><p>Отваря диалогов прозорец за избор на плотер (ETP или Picasso) с цел създаване и конфигуриране на нов лейаут.</p></div></div>
+            <div class="command-entry" data-letter="E"><div class="command-header"><button class="command-button">ETP</button><span class="short-description">Настройки за ETP плотер.</span></div><div class="full-description-panel"><p>Конфигурира и прилага настройки за плотер 'ETP' (HP) към текущия лейаут, като дефинира размера на хартията според маркиран прозорец.</p></div></div>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">PICASSO</button><span class="short-description">Настройки за Picasso плотер.</span></div><div class="full-description-panel"><p>Конфигурира и прилага настройки за плотер 'Picasso' към текущия лейаут, като дефинира размера на хартията според маркиран прозорец.</p></div></div>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">plot1</button><span class="short-description">Плотиране на текущ лейаут.</span></div><div class="full-description-panel"><p>Изпраща текущия лейаут за плотиране. Ако е зададен непознат плотер, автоматично го конфигурира към стандартен такъв.</p></div></div>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">batchPLOT</button><span class="short-description">Плотиране на много лейаути.</span></div><div class="full-description-panel"><p>Позволява плотирането на всички или избрани лейаути в чертежа, с опция за задаване на брой копия.</p></div></div>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">PUBplot</button><span class="short-description">Помощна команда за плотиране.</span></div><div class="full-description-panel"><p>Помощна команда, извиквана от batchPLOT, която извършва самото плотиране на единичен лейаут.</p></div></div>
+            <div class="command-entry" data-letter="C"><div class="command-header"><button class="command-button">clearp</button><span class="short-description">Изчиства Page Setups.</span></div><div class="full-description-panel"><p>Изтрива всички неизползвани Page Setups от чертежа.</p></div></div>
+            <div class="command-entry" data-letter="C"><div class="command-header"><button class="command-button">copyvp</button><span class="short-description">Копира Viewports.</span></div><div class="full-description-panel"><p>Копира всички Viewports от лейаути с един префикс (напр. 'Gore-') към лейаути с друг префикс (напр. 'Dolu-').</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">win1</button><span class="short-description">Задава плотерна област.</span></div><div class="full-description-panel"><p>Задава плотерната област (Plot Window) за текущия лейаут.</p></div></div>
+        </div>
+
+        <div class="category" data-category="title-blocks">
+            <h2>Управление на антетки (Title Blocks)</h2>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">antetka</button><span class="short-description">Меню за антетки.</span></div><div class="full-description-panel"><p>Извиква подменю с команди, свързани със създаване и актуализиране на антетки (title blocks).</p></div></div>
+            <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">ttb</button><span class="short-description">Вмъкване на антетка.</span></div><div class="full-description-panel"><p>Вмъква анетка (title block) и чертожна рамка в текущия лейаут от избрана директория.</p></div></div>
+            <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">ttbu</button><span class="short-description">Ъпдейт на антетки (текущ файл).</span></div><div class="full-description-panel"><p>Актуализира всички използвани антетки (title blocks) в **текущия** чертеж, като ги синхронизира с темплейти от мрежова директория.</p></div></div>
+            <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">titleblocksUpdate</button><span class="short-description">Ъпдейт на антетки (много файлове).</span></div><div class="full-description-panel"><p>Актуализира антетки (title blocks) в **множество избрани** `.dwg` файлове.</p></div></div>
+            <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">ttbhelp</button><span class="short-description">Помощен файл за антетки.</span></div><div class="full-description-panel"><p>Отваря помощен Word документ, свързан с работата с антетки.</p></div></div>
+        </div>
+        
+        <div class="category" data-category="pdf-creation">
+            <h2>Създаване на PDF</h2>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">pdf</button><span class="short-description">Създава PDF с прозорец.</span></div><div class="full-description-panel"><p>Създава PDF файл чрез маркиране на прозорец, като автоматично добавя и конфигурира размер на хартията.</p></div></div>
+            <div class="command-entry" data-letter="E"><div class="command-header"><button class="command-button">E1pdf</button><span class="short-description">Експорт на текущ PDF.</span></div><div class="full-description-panel"><p>Експортира текущия лейаут в PDF файл, използвайки неговите вече зададени настройки и позволява ръчно задаване на отместване (offset).</p></div></div>
+            <div class="command-entry" data-letter="E"><div class="command-header"><button class="command-button">Epdf</button><span class="short-description">Експорт на всички в PDF.</span></div><div class="full-description-panel"><p>Експортира всички лейаути от чертежа в един общ PDF файл.</p></div></div>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">Batchpdf</button><span class="short-description">Пакетен експорт в PDF.</span></div><div class="full-description-panel"><p>Подобна на Epdf, но с леко различен работен процес за експорт на всички лейаути в PDF.</p></div></div>
+        </div>
+        
+        <div class="category" data-category="block-insertion">
+            <h2>Вмъкване на блокове и обекти</h2>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">ramka</button><span class="short-description">Вмъкване на рамка.</span></div><div class="full-description-panel"><p>Вмъква динамичен блок, който служи за чертожна рамка.</p></div></div>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">blockInsert</button><span class="short-description">Вмъкване на блокове.</span></div><div class="full-description-panel"><p>Отваря диалогов прозорец за вмъкване на различни предефинирани блокове (канавки, стрелки, траверси и др.).</p></div></div>
+            <div class="command-entry" data-letter="K"><div class="command-header"><button class="command-button">koti</button><span class="short-description">Вмъкване на базови коти.</span></div><div class="full-description-panel"><p>Вмъква мрежа с базови коти, предназначена за надлъжни профили, с автоматично изчисляване на стойностите.</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qwb</button><span class="short-description">Бърз WBLOCK.</span></div><div class="full-description-panel"><p>Бърз WBLOCK - записва избраните обекти в нов .dwg файл с указана базова точка.</p></div></div>
+        </div>
+
+        <div class="category" data-category="annotations-dimensioning">
+            <h2>Анотации и оразмеряване</h2>
+            <div class="command-entry" data-letter="F"><div class="command-header"><button class="command-button">fields</button><span class="short-description">Вмъкване на полета (Fields).</span></div><div class="full-description-panel"><p>Отваря подменю за вмъкване на динамични полета (Fields) като име на файл, мащаб, дата, ревизия, брой лейаути и др.</p></div></div>
+            <div class="command-entry" data-letter="O"><div class="command-header"><button class="command-button">otkos</button><span class="short-description">Надпис за откос (съотношение).</span></div><div class="full-description-panel"><p>Поставя текст за наклон (в съотношение, напр. 1:1.50) върху избрана линия.</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">naklon</button><span class="short-description">Надпис за наклон (проценти).</span></div><div class="full-description-panel"><p>Поставя текст за наклон (в проценти) заедно със стрелка, указваща посоката.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">dimc</button><span class="short-description">Линейна дименсия.</span></div><div class="full-description-panel"><p>Създава линейна дименсия (dimlinear) със специфичен стил 'DimRWC'.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">dims</button><span class="short-description">Ориентирана дименсия.</span></div><div class="full-description-panel"><p>Създава ориентирана дименсия (dimaligned) със специфичен стил 'DimRWS'.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">DIt</button><span class="short-description">Измерване и вмъкване.</span></div><div class="full-description-panel"><p>Измерва разстоянието между две точки и вмъква резултата в избран текстов обект.</p></div></div>
+        </div>
+
+        <div class="category" data-category="data-extraction">
+            <h2>Изчисления и извличане на данни</h2>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">a3a</button><span class="short-description">Изчислява площ в таблица.</span></div><div class="full-description-panel"><p>Изчислява площта на избрани полилинии и попълва стойността в атрибут на избран блок (таблица за количества).</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regatt</button><span class="short-description">Експорт на атрибути в CSV.</span></div><div class="full-description-panel"><p>Експортира атрибутите на избрани блокове в CSV файл.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regatt2</button><span class="short-description">Разширен експорт на атрибути.</span></div><div class="full-description-panel"><p>Разширена версия на regatt, която освен атрибутите, изчислява и експортира разстоянието и средни стойности между последователно избрани блокове.</p></div></div>
+            <div class="command-entry" data-letter="C"><div class="command-header"><button class="command-button">calc</button><span class="short-description">Калкулатор за текст.</span></div><div class="full-description-panel"><p>Калкулатор, който събира или изважда стойностите от два текстови обекта и записва резултата в трети.</p></div></div>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">BlockExist</button><span class="short-description">Списък на блокове в чертежа.</span></div><div class="full-description-panel"><p>Отваря диалогов прозорец, показващ всички използвани блокове в чертежа.</p></div></div>
+        </div>
+        
+        <div class="category" data-category="system-management">
+            <h2>Управление на файлове и система</h2>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">AddPrinter</button><span class="short-description">Добавяне на принтери.</span></div><div class="full-description-panel"><p>Добавя мрежови принтери чрез стартиране на външен .bat скрипт.</p></div></div>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">AddTosV1</button><span class="short-description">Добавяне на Toshiba 1.</span></div><div class="full-description-panel"><p>Добавя мрежов принтер Toshiba 1.</p></div></div>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">AddTosV2</button><span class="short-description">Добавяне на Toshiba 2.</span></div><div class="full-description-panel"><p>Добавя мрежов принтер Toshiba 2.</p></div></div>
+            <div class="command-entry" data-letter="E"><div class="command-header"><button class="command-button">etr</button><span class="short-description">Създаване на Etransmit пакет.</span></div><div class="full-description-panel"><p>Създава Etransmit пакет (.zip) с опции за управление на външни референции (Xrefs).</p></div></div>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">batchetr</button><span class="short-description">Пакетен Etransmit.</span></div><div class="full-description-panel"><p>Изпълнява Etransmit за множество избрани .dwg файлове едновременно.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">dddteplate</button><span class="short-description">Прилага DWG Properties.</span></div><div class="full-description-panel"><p>Прилага темплейт с DWG Properties към текущия файл и отваря прозореца за редакция.</p></div></div>
+        </div>
+        
+        <div class="category" data-category="utility-editing">
+            <h2>Помощни/редакторски команди</h2>
+            <div class="command-entry" data-letter="M"><div class="command-header"><button class="command-button">movee</button><span class="short-description">Премества към лейаут.</span></div><div class="full-description-panel"><p>Премества избрани обекти до началото на координатната система на лейаута.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">removesign</button><span class="short-description">Изтрива слой 'Signature'.</span></div><div class="full-description-panel"><p>Изтрива слоя 'Signature', който се използва за подписи.</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qe</button><span class="short-description">Бърза редакция на текст.</span></div><div class="full-description-panel"><p>Бърза редакция (Quick Edit) – отваря стойността на избран текстов обект или атрибут в диалогов прозорец за редакция.</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qec</button><span class="short-description">Бърза смяна на цвят.</span></div><div class="full-description-panel"><p>Бърза промяна на цвят (Quick Edit Color) – позволява промяна на цвета на избран обект.</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">ncut</button><span class="short-description">Изрязва от блок.</span></div><div class="full-description-panel"><p>Изрязва (копира и изтрива) обект, вложен в блок, и го поставя в същото пространство като блока.</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">ndel</button><span class="short-description">Изтрива от блок.</span></div><div class="full-description-panel"><p>Изтрива обект, който е вложен в блок, без да се разпада самият блок.</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">wf</button><span class="short-description">Променя Width Factor.</span></div><div class="full-description-panel"><p>Променя Width Factor на избрани текстови обекти.</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">wfb</button><span class="short-description">Променя Width Factor в блок.</span></div><div class="full-description-panel"><p>Променя Width Factor на текстов обект или атрибут в блок.</p></div></div>
+            <div class="command-entry" data-letter="M"><div class="command-header"><button class="command-button">mtw</button><span class="short-description">Променя Width Factor на Mtext.</span></div><div class="full-description-panel"><p>Променя Width Factor на Mtext обекти.</p></div></div>
+            <div class="command-entry" data-letter="E"><div class="command-header"><button class="command-button">etpstyle</button><span class="short-description">Създава текстов стил.</span></div><div class="full-description-panel"><p>Създава текстов стил 'ETP-simplex-0.8' и го задава като текущ.</p></div></div>
+            <div class="command-entry" data-letter="F"><div class="command-header"><button class="command-button">foo / fook / replace1</button><span class="short-description">Помощни/тестови команди.</span></div><div class="full-description-panel"><p>Помощни команди за тестване или преименуване на обекти (вероятно за вътрешна употреба).</p></div></div>
+        </div>
+        
+        <div class="category" data-category="drawing-commands">
+            <h2>Команди за чертане</h2>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">ln</button><span class="short-description">Чертае линия с наклон (%).</span></div><div class="full-description-panel"><p>Чертае линия под точно зададен наклон в проценти.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">lo</button><span class="short-description">Чертае линия с наклон (Y:X).</span></div><div class="full-description-panel"><p>Чертае линия под точно зададен наклон в съотношение (Y:X).</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">ww</button><span class="short-description">Чертае коти на профил.</span></div><div class="full-description-panel"><p>Интерактивна команда за чертане на перпендикулярни отсечки и коти на канавки спрямо семпъл линия.</p></div></div>
+        </div>
+        
+        <div class="category" data-category="layer-properties">
+            <h2>Управление на слоеве и Properties</h2>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">LAQ</button><span class="short-description">Създава слоеве за КСС.</span></div><div class="full-description-panel"><p>Създава слоеве за количествени сметки, дефинирани във външен CSV файл.</p></div></div>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">prop</button><span class="short-description">Отваря DWG Properties.</span></div><div class="full-description-panel"><p>Отваря стандартния прозорец за DWG Properties.</p></div></div>
+        </div>
+
+        <div class="category" data-category="testing-unfinished">
+            <h2>Тестови/Недовършени</h2>
+            <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">testkhkkhkk</button><span class="short-description">Тест на клавиатура.</span></div><div class="full-description-panel"><p>Тества реакцията на клавиатурата чрез `grread` и `acet-sys-keystate`.</p></div></div>
+        </div>
+
+        <div class="category" data-category="undefined-aliases">
+            <h2>Алиаси към недефинирани команди</h2>
+            <div class="alias-note"><p><strong>Внимание:</strong> Следващите команди са дефинирани като алиаси, но командите, които те извикват, не се намират в този LISP файл. За да работят, е необходимо да се зареди друг файл с техните дефиниции.</p></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button alias-button">d3</button><span class="short-description">Недефиниран алиас.</span></div><div class="full-description-panel"><p>Командата 'd3' не е дефинирана в този файл.</p></div></div>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button alias-button">a3</button><span class="short-description">Недефиниран алиас.</span></div><div class="full-description-panel"><p>Командата 'a3' не е дефинирана в този файл.</p></div></div>
+            <div class="command-entry" data-letter="K"><div class="command-header"><button class="command-button alias-button">km</button><span class="short-description">Недефиниран алиас.</span></div><div class="full-description-panel"><p>Командата 'km' не е дефинирана в този файл.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button alias-button">relay</button><span class="short-description">Недефиниран алиас.</span></div><div class="full-description-panel"><p>Командата 'relay' не е дефинирана в този файл.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button alias-button">lsteal</button><span class="short-description">Недефиниран алиас.</span></div><div class="full-description-panel"><p>Командата 'lsteal' не е дефинирана в този файл.</p></div></div>
+            <div class="command-entry" data-letter="S"><div class="command-header"><button class="command-button alias-button">slope</button><span class="short-description">Недефиниран алиас.</span></div><div class="full-description-panel"><p>Командата 'slope' не е дефинирана в този файл.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button alias-button">lispload</button><span class="short-description">Недефиниран алиас.</span></div><div class="full-description-panel"><p>Командата 'lispload' не е дефинирана в този файл.</p></div></div>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button alias-button">addtoblock</button><span class="short-description">Недефиниран алиас.</span></div><div class="full-description-panel"><p>Командата 'addtoblock' не е дефинирана в този файл.</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button alias-button">nmove</button><span class="short-description">Недефиниран алиас.</span></div><div class="full-description-panel"><p>Командата 'nmove' не е дефинирана в този файл.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button alias-button">label</button><span class="short-description">Недефиниран алиас.</span></div><div class="full-description-panel"><p>Командата 'label' не е дефинирана в този файл.</p></div></div>
+        </div>
+    </div>
+
+    <!-- START: JavaScript за филтър и падащи панели -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterContainer = document.getElementById('alphabet-filter');
+            const categories = document.querySelectorAll('.category');
+            const commandEntries = document.querySelectorAll('.command-entry');
+            const commandHeaders = document.querySelectorAll('.command-header');
+
+            // --- Логика за азбучния филтър ---
+            filterContainer.addEventListener('click', function(e) {
+                const button = e.target.closest('.filter-button');
+                if (!button) return;
+
+                const filter = button.dataset.filter.toUpperCase();
+
+                // Управление на активния бутон
+                filterContainer.querySelector('.active').classList.remove('active');
+                button.classList.add('active');
+
+                // Филтриране на командите
+                commandEntries.forEach(entry => {
+                    const letter = entry.dataset.letter.toUpperCase();
+                    if (filter === 'ALL' || letter === filter) {
+                        entry.classList.remove('hidden');
+                    } else {
+                        entry.classList.add('hidden');
+                    }
+                });
+
+                // Скриване на празни категории
+                categories.forEach(category => {
+                    const visibleEntries = category.querySelectorAll('.command-entry:not(.hidden)');
+                    if (visibleEntries.length === 0) {
+                        category.classList.add('hidden');
+                    } else {
+                        category.classList.remove('hidden');
+                    }
+                });
+            });
+
+            // --- Логика за падащите панели ---
+            commandHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const button = this.querySelector('.command-button');
+                    const currentPanel = this.nextElementSibling;
+
+                    // Затваряме всички други отворени панели
+                    document.querySelectorAll('.full-description-panel.show').forEach(panel => {
+                        if (panel !== currentPanel) {
+                            panel.classList.remove('show');
+                            panel.previousElementSibling.querySelector('.command-button').classList.remove('active');
+                        }
+                    });
+
+                    // Превключваме видимостта на текущия панел
+                    currentPanel.classList.toggle('show');
+                    button.classList.toggle('active');
+                });
+            });
+        });
+    </script>
+    <!-- END: JavaScript -->
+
+</body>
+</html>
