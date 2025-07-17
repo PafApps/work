@@ -25,9 +25,11 @@
         #suggestions-list .suggestion-details { flex-grow: 1; }
         #suggestions-list .suggester-name { font-weight: bold; color: #1d3557; }
         #suggestions-list .suggestion-text { margin-top: 5px; white-space: pre-wrap; }
-        #suggestions-list .status-toggle { cursor: pointer; border: none; background: none; font-size: 16px; padding: 5px 10px; border-radius: 5px; transition: background-color 0.3s; min-width: 150px; text-align: left; }
+        #suggestions-list .status-toggle { border: none; background: none; font-size: 16px; padding: 5px 10px; border-radius: 5px; transition: background-color 0.3s; min-width: 150px; text-align: left; }
         #suggestions-list .status-toggle.is-pending { background-color: #fce8e6; color: #a50e0e; }
         #suggestions-list .status-toggle.is-done { background-color: #e6f4ea; color: #137333; }
+        #suggestions-list .status-toggle.admin-enabled { cursor: pointer; }
+        #suggestions-list .status-toggle:not(.admin-enabled) { cursor: not-allowed; opacity: 0.7; }
         #alphabet-filter { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e1e1e1; }
         .filter-button { background-color: #a8dadc; color: #1d3557; border: none; border-radius: 4px; padding: 5px 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, color 0.3s; }
         .filter-button:hover, .filter-button.active { background-color: #1d3557; color: white; }
@@ -55,20 +57,16 @@
 
         <h1>Интерактивен списък на AutoLISP команди</h1>
 
-        <!-- Азбучен филтър -->
         <div id="alphabet-filter">
             <button class="filter-button active" data-filter="all">ВСИЧКИ</button>
             <script>document.write(Array.from(Array(26)).map((e, i) => `<button class="filter-button" data-filter="${String.fromCharCode(i + 65)}">${String.fromCharCode(i + 65)}</button>`).join(''));</script>
         </div>
         
-        <!-- Секции с команди (пълната структура) -->
-        <!-- Основен интерфейс -->
         <div class="category" data-category="main-interface">
             <h2>Основен интерфейс</h2>
             <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">PPS</button><span class="short-description">Основен диалогов прозорец.</span></div><div class="full-description-panel"><p>Извиква главния диалогов прозорец 'PAF Page Setups' (PPS), който служи като централен хъб за достъп до повечето други команди.</p></div></div>
         </div>
 
-        <!-- Управление на лейаути и плотиране -->
         <div class="category" data-category="layout-plotting">
             <h2>Управление на лейаути и плотиране</h2>
             <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">Layouts</button><span class="short-description">Създаване на лейаут.</span></div><div class="full-description-panel"><p>Отваря диалогов прозорец за избор на плотер (ETP или Picasso) с цел създаване и конфигуриране на нов лейаут.</p></div></div>
@@ -82,7 +80,6 @@
             <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">win1</button><span class="short-description">Задава плотерна област.</span></div><div class="full-description-panel"><p>Задава плотерната област (Plot Window) за текущия лейаут.</p></div></div>
         </div>
 
-        <!-- Управление на антетки (Title Blocks) -->
         <div class="category" data-category="title-blocks">
             <h2>Управление на антетки (Title Blocks)</h2>
             <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">antetka</button><span class="short-description">Меню за антетки.</span></div><div class="full-description-panel"><p>Извиква подменю с команди, свързани със създаване и актуализиране на антетки (title blocks).</p></div></div>
@@ -92,7 +89,6 @@
             <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">ttbhelp</button><span class="short-description">Помощен файл за антетки.</span></div><div class="full-description-panel"><p>Отваря помощен Word документ, свързан с работата с антетки.</p></div></div>
         </div>
         
-        <!-- Създаване на PDF -->
         <div class="category" data-category="pdf-creation">
             <h2>Създаване на PDF</h2>
             <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">pdf</button><span class="short-description">Създава PDF с прозорец.</span></div><div class="full-description-panel"><p>Създава PDF файл чрез маркиране на прозорец, като автоматично добавя и конфигурира размер на хартията.</p></div></div>
@@ -101,7 +97,6 @@
             <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">Batchpdf</button><span class="short-description">Пакетен експорт в PDF.</span></div><div class="full-description-panel"><p>Подобна на Epdf, но с леко различен работен процес за експорт на всички лейаути в PDF.</p></div></div>
         </div>
         
-        <!-- Вмъкване на блокове и обекти -->
         <div class="category" data-category="block-insertion">
             <h2>Вмъкване на блокове и обекти</h2>
             <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">ramka</button><span class="short-description">Вмъкване на рамка.</span></div><div class="full-description-panel"><p>Вмъква динамичен блок, който служи за чертожна рамка.</p></div></div>
@@ -110,7 +105,6 @@
             <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qwb</button><span class="short-description">Бърз WBLOCK.</span></div><div class="full-description-panel"><p>Бърз WBLOCK - записва избраните обекти в нов .dwg файл с указана базова точка.</p></div></div>
         </div>
 
-        <!-- Анотации и оразмеряване -->
         <div class="category" data-category="annotations-dimensioning">
             <h2>Анотации и оразмеряване</h2>
             <div class="command-entry" data-letter="F"><div class="command-header"><button class="command-button">fields</button><span class="short-description">Вмъкване на полета (Fields).</span></div><div class="full-description-panel"><p>Отваря подменю за вмъкване на динамични полета (Fields) като име на файл, мащаб, дата, ревизия, брой лейаути и др.</p></div></div>
@@ -121,7 +115,6 @@
             <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">DIt</button><span class="short-description">Измерване и вмъкване.</span></div><div class="full-description-panel"><p>Измерва разстоянието между две точки и вмъква резултата в избран текстов обект.</p></div></div>
         </div>
 
-        <!-- Изчисления и извличане на данни -->
         <div class="category" data-category="data-extraction">
             <h2>Изчисления и извличане на данни</h2>
             <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">a3a</button><span class="short-description">Изчислява площ в таблица.</span></div><div class="full-description-panel"><p>Изчислява площта на избрани полилинии и попълва стойността в атрибут на избран блок (таблица за количества).</p></div></div>
@@ -131,7 +124,6 @@
             <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">BlockExist</button><span class="short-description">Списък на блокове в чертежа.</span></div><div class="full-description-panel"><p>Отваря диалогов прозорец, показващ всички използвани блокове в чертежа.</p></div></div>
         </div>
         
-        <!-- Управление на файлове и система -->
         <div class="category" data-category="system-management">
             <h2>Управление на файлове и система</h2>
             <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">AddPrinter</button><span class="short-description">Добавяне на принтери.</span></div><div class="full-description-panel"><p>Добавя мрежови принтери чрез стартиране на външен .bat скрипт.</p></div></div>
@@ -142,7 +134,6 @@
             <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">dddteplate</button><span class="short-description">Прилага DWG Properties.</span></div><div class="full-description-panel"><p>Прилага темплейт с DWG Properties към текущия файл и отваря прозореца за редакция.</p></div></div>
         </div>
         
-        <!-- Помощни/редакторски команди -->
         <div class="category" data-category="utility-editing">
             <h2>Помощни/редакторски команди</h2>
             <div class="command-entry" data-letter="M"><div class="command-header"><button class="command-button">movee</button><span class="short-description">Премества към лейаут.</span></div><div class="full-description-panel"><p>Премества избрани обекти до началото на координатната система на лейаута.</p></div></div>
@@ -237,6 +228,13 @@
         const suggestionsRef = db.ref("suggestions");
 
         document.addEventListener('DOMContentLoaded', function() {
+            // --- Функция за проверка на администраторски права ---
+            const isAdmin = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('admin') === 'true';
+            };
+            const adminMode = isAdmin();
+
             // Елементи за предложения
             const addSuggestionBtn = document.getElementById('add-suggestion-btn');
             const viewSuggestionsBtn = document.getElementById('view-suggestions-btn');
@@ -259,23 +257,33 @@
                     const suggestion = childSnapshot.val();
                     const item = document.createElement('div');
                     item.className = 'suggestion-item';
+                    
+                    const statusBtn = document.createElement('button');
+                    statusBtn.className = 'status-toggle';
+                    statusBtn.dataset.id = key;
+                    if (suggestion.status === 'done') {
+                        statusBtn.textContent = '✅ Направено';
+                        statusBtn.classList.add('is-done');
+                    } else {
+                        statusBtn.textContent = '❌ Не е направено';
+                        statusBtn.classList.add('is-pending');
+                    }
+                    if (adminMode) {
+                        statusBtn.classList.add('admin-enabled');
+                    }
+                    
                     item.innerHTML = `
                         <div class="suggestion-details">
                             <p class="suggester-name">${suggestion.name || 'Анонимен'}:</p>
                             <p class="suggestion-text">${suggestion.text}</p>
-                        </div>
-                        <button class="status-toggle ${suggestion.status === 'done' ? 'is-done' : 'is-pending'}" data-id="${key}">
-                            ${suggestion.status === 'done' ? '✅ Направено' : '❌ Не е направено'}
-                        </button>
-                    `;
+                        </div>`;
+                    item.appendChild(statusBtn);
                     suggestionsListDiv.appendChild(item);
                 });
             };
 
             // Слушател за промени в базата данни
-            suggestionsRef.orderByChild("timestamp").on("value", renderSuggestions, (error) => {
-                console.error("Грешка при извличане: ", error);
-            });
+            suggestionsRef.orderByChild("timestamp").on("value", renderSuggestions);
 
             // Управление на модални прозорци
             addSuggestionBtn.addEventListener('click', () => { suggestionFormModal.style.display = 'block'; });
@@ -303,18 +311,16 @@
                     text: text.trim(),
                     status: 'pending',
                     timestamp: firebase.database.ServerValue.TIMESTAMP
-                })
-                .then(() => {
+                }).then(() => {
                     suggestionForm.reset();
                     suggestionFormModal.style.display = 'none';
                     alert('Благодарим за предложението!');
-                })
-                .catch((error) => console.error("Грешка при запис: ", error));
+                }).catch((error) => console.error("Грешка при запис: ", error));
             });
             
             // Промяна на статус
             suggestionsListDiv.addEventListener('click', (e) => {
-                if (e.target.classList.contains('status-toggle')) {
+                if (e.target.classList.contains('status-toggle') && adminMode) {
                     const id = e.target.dataset.id;
                     const docRef = suggestionsRef.child(id);
                     docRef.get().then((snapshot) => {
