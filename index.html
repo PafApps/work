@@ -4,7 +4,7 @@
     <!-- Важно: Файлът трябва да бъде запазен с кодиране (Encoding) UTF-8 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Пълен списък на AutoLISP команди с филтър</title>
+    <title>Пълен списък на AutoLISP команди (с Firebase)</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; line-height: 1.6; margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: 0 auto; background-color: #fff; padding: 25px 35px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
@@ -24,7 +24,7 @@
         #suggestions-list .suggestion-item { border-bottom: 1px solid #eee; padding: 15px 5px; display: flex; justify-content: space-between; align-items: flex-start; }
         #suggestions-list .suggestion-details { flex-grow: 1; }
         #suggestions-list .suggester-name { font-weight: bold; color: #1d3557; }
-        #suggestions-list .suggestion-text { margin-top: 5px; }
+        #suggestions-list .suggestion-text { margin-top: 5px; white-space: pre-wrap; }
         #suggestions-list .status-toggle { cursor: pointer; border: none; background: none; font-size: 16px; padding: 5px 10px; border-radius: 5px; transition: background-color 0.3s; min-width: 150px; text-align: left; }
         #suggestions-list .status-toggle.is-pending { background-color: #fce8e6; color: #a50e0e; }
         #suggestions-list .status-toggle.is-done { background-color: #e6f4ea; color: #137333; }
@@ -40,9 +40,6 @@
         .full-description-panel { max-height: 0; opacity: 0; overflow: hidden; background-color: #f1faee; color: #1d3557; box-sizing: border-box; transition: max-height 0.4s ease-out, opacity 0.3s ease-out, padding 0.4s ease-out; padding: 0 15px; }
         .full-description-panel.show { max-height: 200px; opacity: 1; padding: 15px; transition: max-height 0.4s ease-in, opacity 0.3s ease-in, padding 0.4s ease-in; }
         .full-description-panel p { margin: 0; font-size: 14px; }
-        .alias-note { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin-top: 20px; }
-        .alias-button { background-color: #e63946; }
-        .alias-button:hover, .alias-button.active { background-color: #a8202b; }
     </style>
 </head>
 <body>
@@ -58,16 +55,20 @@
 
         <h1>Интерактивен списък на AutoLISP команди</h1>
 
+        <!-- Азбучен филтър -->
         <div id="alphabet-filter">
             <button class="filter-button active" data-filter="all">ВСИЧКИ</button>
             <script>document.write(Array.from(Array(26)).map((e, i) => `<button class="filter-button" data-filter="${String.fromCharCode(i + 65)}">${String.fromCharCode(i + 65)}</button>`).join(''));</script>
         </div>
         
+        <!-- Секции с команди (пълната структура) -->
+        <!-- Основен интерфейс -->
         <div class="category" data-category="main-interface">
             <h2>Основен интерфейс</h2>
             <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">PPS</button><span class="short-description">Основен диалогов прозорец.</span></div><div class="full-description-panel"><p>Извиква главния диалогов прозорец 'PAF Page Setups' (PPS), който служи като централен хъб за достъп до повечето други команди.</p></div></div>
         </div>
 
+        <!-- Управление на лейаути и плотиране -->
         <div class="category" data-category="layout-plotting">
             <h2>Управление на лейаути и плотиране</h2>
             <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">Layouts</button><span class="short-description">Създаване на лейаут.</span></div><div class="full-description-panel"><p>Отваря диалогов прозорец за избор на плотер (ETP или Picasso) с цел създаване и конфигуриране на нов лейаут.</p></div></div>
@@ -81,6 +82,7 @@
             <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">win1</button><span class="short-description">Задава плотерна област.</span></div><div class="full-description-panel"><p>Задава плотерната област (Plot Window) за текущия лейаут.</p></div></div>
         </div>
 
+        <!-- Управление на антетки (Title Blocks) -->
         <div class="category" data-category="title-blocks">
             <h2>Управление на антетки (Title Blocks)</h2>
             <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">antetka</button><span class="short-description">Меню за антетки.</span></div><div class="full-description-panel"><p>Извиква подменю с команди, свързани със създаване и актуализиране на антетки (title blocks).</p></div></div>
@@ -90,6 +92,7 @@
             <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">ttbhelp</button><span class="short-description">Помощен файл за антетки.</span></div><div class="full-description-panel"><p>Отваря помощен Word документ, свързан с работата с антетки.</p></div></div>
         </div>
         
+        <!-- Създаване на PDF -->
         <div class="category" data-category="pdf-creation">
             <h2>Създаване на PDF</h2>
             <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">pdf</button><span class="short-description">Създава PDF с прозорец.</span></div><div class="full-description-panel"><p>Създава PDF файл чрез маркиране на прозорец, като автоматично добавя и конфигурира размер на хартията.</p></div></div>
@@ -98,6 +101,7 @@
             <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">Batchpdf</button><span class="short-description">Пакетен експорт в PDF.</span></div><div class="full-description-panel"><p>Подобна на Epdf, но с леко различен работен процес за експорт на всички лейаути в PDF.</p></div></div>
         </div>
         
+        <!-- Вмъкване на блокове и обекти -->
         <div class="category" data-category="block-insertion">
             <h2>Вмъкване на блокове и обекти</h2>
             <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">ramka</button><span class="short-description">Вмъкване на рамка.</span></div><div class="full-description-panel"><p>Вмъква динамичен блок, който служи за чертожна рамка.</p></div></div>
@@ -106,6 +110,7 @@
             <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qwb</button><span class="short-description">Бърз WBLOCK.</span></div><div class="full-description-panel"><p>Бърз WBLOCK - записва избраните обекти в нов .dwg файл с указана базова точка.</p></div></div>
         </div>
 
+        <!-- Анотации и оразмеряване -->
         <div class="category" data-category="annotations-dimensioning">
             <h2>Анотации и оразмеряване</h2>
             <div class="command-entry" data-letter="F"><div class="command-header"><button class="command-button">fields</button><span class="short-description">Вмъкване на полета (Fields).</span></div><div class="full-description-panel"><p>Отваря подменю за вмъкване на динамични полета (Fields) като име на файл, мащаб, дата, ревизия, брой лейаути и др.</p></div></div>
@@ -116,6 +121,7 @@
             <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">DIt</button><span class="short-description">Измерване и вмъкване.</span></div><div class="full-description-panel"><p>Измерва разстоянието между две точки и вмъква резултата в избран текстов обект.</p></div></div>
         </div>
 
+        <!-- Изчисления и извличане на данни -->
         <div class="category" data-category="data-extraction">
             <h2>Изчисления и извличане на данни</h2>
             <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">a3a</button><span class="short-description">Изчислява площ в таблица.</span></div><div class="full-description-panel"><p>Изчислява площта на избрани полилинии и попълва стойността в атрибут на избран блок (таблица за количества).</p></div></div>
@@ -125,6 +131,7 @@
             <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">BlockExist</button><span class="short-description">Списък на блокове в чертежа.</span></div><div class="full-description-panel"><p>Отваря диалогов прозорец, показващ всички използвани блокове в чертежа.</p></div></div>
         </div>
         
+        <!-- Управление на файлове и система -->
         <div class="category" data-category="system-management">
             <h2>Управление на файлове и система</h2>
             <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">AddPrinter</button><span class="short-description">Добавяне на принтери.</span></div><div class="full-description-panel"><p>Добавя мрежови принтери чрез стартиране на външен .bat скрипт.</p></div></div>
@@ -135,6 +142,7 @@
             <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">dddteplate</button><span class="short-description">Прилага DWG Properties.</span></div><div class="full-description-panel"><p>Прилага темплейт с DWG Properties към текущия файл и отваря прозореца за редакция.</p></div></div>
         </div>
         
+        <!-- Помощни/редакторски команди -->
         <div class="category" data-category="utility-editing">
             <h2>Помощни/редакторски команди</h2>
             <div class="command-entry" data-letter="M"><div class="command-header"><button class="command-button">movee</button><span class="short-description">Премества към лейаут.</span></div><div class="full-description-panel"><p>Премества избрани обекти до началото на координатната система на лейаута.</p></div></div>
@@ -206,7 +214,28 @@
         </div>
     </div>
     
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script>
+        // <<< ВАШАТА FIREBASE КОНФИГУРАЦИЯ Е ПОСТАВЕНА ТУК >>>
+        const firebaseConfig = {
+          apiKey: "AIzaSyACB9shT_VTr3PGW_1nFjJCGAgwSI55Omw",
+          authDomain: "clickcount-a6e46.firebaseapp.com",
+          databaseURL: "https://clickcount-a6e46-default-rtdb.firebaseio.com",
+          projectId: "clickcount-a6e46",
+          storageBucket: "clickcount-a6e46.appspot.com",
+          messagingSenderId: "53304151952",
+          appId: "1:53304151952:web:ed0c365ace6b1232842d15",
+          measurementId: "G-5S028177MG"
+        };
+
+        // Инициализация на Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const suggestionsRef = db.ref("suggestions");
+
         document.addEventListener('DOMContentLoaded', function() {
             // Елементи за предложения
             const addSuggestionBtn = document.getElementById('add-suggestion-btn');
@@ -218,27 +247,24 @@
             const suggestionCountSpan = document.getElementById('suggestion-count');
             const closeButtons = document.querySelectorAll('.close-button');
 
-            // Функции за localStorage
-            const getSuggestions = () => JSON.parse(localStorage.getItem('commandSuggestions') || '[]');
-            const saveSuggestions = (suggestions) => localStorage.setItem('commandSuggestions', JSON.stringify(suggestions));
-            
-            const renderSuggestions = () => {
-                const suggestions = getSuggestions();
+            const renderSuggestions = (snapshot) => {
                 suggestionsListDiv.innerHTML = '';
-                suggestionCountSpan.textContent = suggestions.length;
-                if (suggestions.length === 0) {
+                suggestionCountSpan.textContent = snapshot.numChildren();
+                if (!snapshot.exists()) {
                     suggestionsListDiv.innerHTML = '<p>Все още няма подадени предложения.</p>';
                     return;
                 }
-                suggestions.forEach(suggestion => {
+                snapshot.forEach(childSnapshot => {
+                    const key = childSnapshot.key;
+                    const suggestion = childSnapshot.val();
                     const item = document.createElement('div');
                     item.className = 'suggestion-item';
                     item.innerHTML = `
                         <div class="suggestion-details">
-                            <p class="suggester-name">${suggestion.name}:</p>
+                            <p class="suggester-name">${suggestion.name || 'Анонимен'}:</p>
                             <p class="suggestion-text">${suggestion.text}</p>
                         </div>
-                        <button class="status-toggle ${suggestion.status === 'done' ? 'is-done' : 'is-pending'}" data-id="${suggestion.id}">
+                        <button class="status-toggle ${suggestion.status === 'done' ? 'is-done' : 'is-pending'}" data-id="${key}">
                             ${suggestion.status === 'done' ? '✅ Направено' : '❌ Не е направено'}
                         </button>
                     `;
@@ -246,9 +272,14 @@
                 });
             };
 
+            // Слушател за промени в базата данни
+            suggestionsRef.orderByChild("timestamp").on("value", renderSuggestions, (error) => {
+                console.error("Грешка при извличане: ", error);
+            });
+
             // Управление на модални прозорци
             addSuggestionBtn.addEventListener('click', () => { suggestionFormModal.style.display = 'block'; });
-            viewSuggestionsBtn.addEventListener('click', () => { renderSuggestions(); suggestionsListModal.style.display = 'block'; });
+            viewSuggestionsBtn.addEventListener('click', () => { suggestionsListModal.style.display = 'block'; });
             closeButtons.forEach(btn => btn.addEventListener('click', () => {
                 suggestionFormModal.style.display = 'none';
                 suggestionsListModal.style.display = 'none';
@@ -266,30 +297,36 @@
                 const name = document.getElementById('suggester-name').value;
                 const text = document.getElementById('suggestion-text').value;
                 if (!text.trim()) { alert('Моля, въведете текст на предложението.'); return; }
-                const suggestions = getSuggestions();
-                suggestions.push({ id: Date.now(), name: name.trim() || 'Анонимен', text: text.trim(), status: 'pending' });
-                saveSuggestions(suggestions);
-                suggestionForm.reset();
-                suggestionFormModal.style.display = 'none';
-                renderSuggestions();
-                alert('Благодарим за предложението!');
+                
+                suggestionsRef.push({
+                    name: name.trim() || 'Анонимен',
+                    text: text.trim(),
+                    status: 'pending',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                })
+                .then(() => {
+                    suggestionForm.reset();
+                    suggestionFormModal.style.display = 'none';
+                    alert('Благодарим за предложението!');
+                })
+                .catch((error) => console.error("Грешка при запис: ", error));
             });
             
             // Промяна на статус
             suggestionsListDiv.addEventListener('click', (e) => {
                 if (e.target.classList.contains('status-toggle')) {
-                    const id = Number(e.target.dataset.id);
-                    const suggestions = getSuggestions();
-                    const suggestion = suggestions.find(s => s.id === id);
-                    if (suggestion) {
-                        suggestion.status = suggestion.status === 'pending' ? 'done' : 'pending';
-                        saveSuggestions(suggestions);
-                        renderSuggestions();
-                    }
+                    const id = e.target.dataset.id;
+                    const docRef = suggestionsRef.child(id);
+                    docRef.get().then((snapshot) => {
+                        if (snapshot.exists()) {
+                            const newStatus = snapshot.val().status === 'pending' ? 'done' : 'pending';
+                            docRef.update({ status: newStatus });
+                        }
+                    });
                 }
             });
 
-            // --- Логика за филтър и падащи панели ---
+            // Логика за филтър и падащи панели
             const filterContainer = document.getElementById('alphabet-filter');
             const categories = document.querySelectorAll('.category');
             const commandEntries = document.querySelectorAll('.command-entry');
@@ -327,9 +364,6 @@
                     button.classList.toggle('active');
                 });
             });
-            
-            // Инициализация
-            renderSuggestions();
         });
     </script>
 </body>
