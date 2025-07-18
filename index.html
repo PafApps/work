@@ -65,7 +65,6 @@
         <div class="filters-container">
             <div id="alphabet-filter">
                 <button class="filter-button active" data-filter="all">ВСИЧКИ БУКВИ</button>
-                <script>document.write(Array.from(Array(26)).map((e, i) => `<button class="filter-button" data-filter="${String.fromCharCode(i + 65)}">${String.fromCharCode(i + 65)}</button>`).join(''));</script>
             </div>
             <div id="category-filter">
                 <button class="filter-button active" data-filter="all">ВСИЧКИ КАТЕГОРИИ</button>
@@ -247,7 +246,8 @@
             <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regVro</button><span class="short-description">Изкарва регистър в Профил (Път).</span></div><div class="full-description-panel"><p>Изкарва регистър в Профил на Път във файл в същата папка.</p></div></div>
         </div>
     </div>
-       <!-- Модални прозорци за предложения -->
+
+    <!-- Модални прозорци за предложения -->
     <div id="suggestion-form-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">×</span>
@@ -403,11 +403,20 @@
             const commandEntries = document.querySelectorAll('.command-entry');
             const commandHeaders = document.querySelectorAll('.command-header');
 
+            // Генериране на бутоните за азбуката
+            for (let i = 65; i <= 90; i++) {
+                const letter = String.fromCharCode(i);
+                const button = document.createElement('button');
+                button.className = 'filter-button';
+                button.dataset.filter = letter;
+                button.textContent = letter;
+                alphabetFilter.appendChild(button);
+            }
+
             let currentAlphabetFilter = 'all';
             let currentCategoryFilter = 'all';
 
             const applyFilters = () => {
-                // Първо, преминаваме през всяка команда и решаваме дали да е видима
                 commandEntries.forEach(entry => {
                     const letter = entry.dataset.letter.toUpperCase();
                     const category = entry.closest('.category').dataset.category;
@@ -415,17 +424,20 @@
                     const letterMatch = (currentAlphabetFilter === 'all' || letter === currentAlphabetFilter);
                     const categoryMatch = (currentCategoryFilter === 'all' || category === currentCategoryFilter);
 
-                    // Използваме .hidden клас за видимост
-                    entry.classList.toggle('hidden', !(letterMatch && categoryMatch));
+                    if (letterMatch && categoryMatch) {
+                        entry.classList.remove('hidden');
+                    } else {
+                        entry.classList.add('hidden');
+                    }
                 });
                 
-                // Второ, преминаваме през всяка категория и я показваме, само ако има видими команди в нея
                 categories.forEach(category => {
-                    // Търсим дали има поне една видима команда (без клас .hidden) вътре
-                    const hasVisibleCommands = category.querySelector('.command-entry:not(.hidden)');
-                    
-                    // Показваме или скриваме цялата категория
-                    category.classList.toggle('hidden', !hasVisibleCommands);
+                    const hasVisibleChildren = category.querySelector('.command-entry:not(.hidden)');
+                    if (hasVisibleChildren) {
+                        category.classList.remove('hidden');
+                    } else {
+                        category.classList.add('hidden');
+                    }
                 });
             };
 
