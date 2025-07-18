@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <!-- Важно: Файлът трябва да бъде запазен с кодиране (Encoding) UTF-8 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пълен списък на AutoLISP команди (86) с Firebase</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; color: #333; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 950px; margin: 0 auto; background-color: #fff; padding: 25px 35px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
+        h1, h3 { text-align: center; color: #1d3557; border-bottom: 2px solid #457b9d; padding-bottom: 10px; margin-bottom: 30px; }
+        h3 { border-bottom: none; color: #555; font-weight: normal; margin-top: -20px; }
+        h2 { color: #e63946; margin-top: 40px; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #f1faee; font-size: 1.6em; background-color: #f8f9fa; padding: 10px; border-radius: 5px; }
+        .header-buttons { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; }
+        .header-btn { background-color: #e63946; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background-color 0.3s; }
+        .header-btn:hover { background-color: #a8202b; }
+        #suggestion-count { background-color: white; color: #e63946; border-radius: 50%; padding: 0px 6px; font-size: 12px; margin-left: 5px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px; position: relative; }
+        .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        #suggestion-form label { display: block; margin-top: 10px; font-weight: bold; }
+        #suggestion-form input[type="text"], #suggestion-form textarea { width: 95%; padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
+        #suggestion-form textarea { height: 100px; resize: vertical; }
+        #suggestion-form button { background-color: #457b9d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; font-size: 16px; }
+        #suggestions-list .suggestion-item { border-bottom: 1px solid #eee; padding: 15px 5px; display: flex; justify-content: space-between; align-items: flex-start; }
+        #suggestions-list .suggestion-details { flex-grow: 1; }
+        #suggestions-list .suggester-name { font-weight: bold; color: #1d3557; }
+        #suggestions-list .suggestion-text { margin-top: 5px; white-space: pre-wrap; }
+        #suggestions-list .status-toggle { border: none; background: none; font-size: 16px; padding: 5px 10px; border-radius: 5px; transition: background-color 0.3s; min-width: 150px; text-align: left; }
+        #suggestions-list .status-toggle.is-pending { background-color: #fce8e6; color: #a50e0e; }
+        #suggestions-list .status-toggle.is-done { background-color: #e6f4ea; color: #137333; }
+        #suggestions-list .status-toggle.admin-enabled { cursor: pointer; }
+        #suggestions-list .status-toggle:not(.admin-enabled) { cursor: not-allowed; opacity: 0.7; }
+        #alphabet-filter { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e1e1e1; }
+        .filter-button { background-color: #a8dadc; color: #1d3557; border: none; border-radius: 4px; padding: 5px 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
+        .filter-button:hover { background-color: #457b9d; color: white; transform: translateY(-2px); }
+        .filter-button.active { background-color: #1d3557; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .category.hidden, .command-entry.hidden { display: none; }
+        .command-entry { margin-bottom: 8px; border-radius: 6px; overflow: hidden; border: 1px solid #e9ecef; transition: box-shadow 0.3s; }
+        .command-entry:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .command-header { display: flex; align-items: center; background-color: #f8f9fa; padding: 8px 15px; cursor: pointer; }
+        .command-button { background-color: #457b9d; color: white; border: none; padding: 8px 12px; border-radius: 5px; font-size: 15px; transition: background-color 0.3s; text-align: center; font-weight: 500; min-width: 180px; text-transform: uppercase; }
+        .command-header:hover .command-button, .command-button.active { background-color: #1d3557; }
+        .short-description { margin-left: 20px; font-size: 15px; color: #555; flex-grow: 1; }
+        .full-description-panel { max-height: 0; opacity: 0; overflow: hidden; background-color: #f1faee; color: #1d3557; box-sizing: border-box; transition: max-height 0.4s ease-out, opacity 0.3s ease-out, padding 0.4s ease-out; padding: 0 15px; border-top: 1px solid #e1e1e1; }
+        .full-description-panel.show { max-height: 300px; opacity: 1; padding: 15px; transition: max-height 0.4s ease-in, opacity 0.3s ease-in, padding 0.4s ease-in; }
+        .full-description-panel p { margin: 0; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-buttons">
+            <button id="add-suggestion-btn" class="header-btn">Предложение</button>
+            <button id="view-suggestions-btn" class="header-btn">
+                Виж предложенията
+                <span id="suggestion-count">0</span>
+            </button>
+        </div>
+
+        <h1>Интерактивен списък на AutoLISP команди</h1>
+        <h3>Намерени общо 86 уникални команди, разпределени в категории</h3>
+
+        <div id="alphabet-filter">
+            <button class="filter-button active" data-filter="all">ВСИЧКИ</button>
+            <script>document.write(Array.from(Array(26)).map((e, i) => `<button class="filter-button" data-filter="${String.fromCharCode(i + 65)}">${String.fromCharCode(i + 65)}</button>`).join(''));</script>
+        </div>
+        
+        <div class="category" data-category="situation">
+            <h2>Команди за Ситуация</h2>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">addtoblock</button><span class="short-description">Добавя обекти към блок.</span></div><div class="full-description-panel"><p>Вкарва маркирани обекти в съществуващ, маркиран от вас блок.</p></div></div>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">BatchETR</button><span class="short-description">Прави ETRANSMIT на много файлове.</span></div><div class="full-description-panel"><p>Прави ETRANSМIT на избрани файлове с възможни 3 настройки (Batch Etransmit).</p></div></div>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">Bind-Detach</button><span class="short-description">Bind-ва или Detach-ва Xref-ове.</span></div><div class="full-description-panel"><p>Вкарва заредените Xref-ове във файла като блокове (Bind), а незаредените ги премахва (Detach).</p></div></div>
+            <div class="command-entry" data-letter="C"><div class="command-header"><button class="command-button">calc</button><span class="short-description">Събира/Изважда стойности от текст.</span></div><div class="full-description-panel"><p>Събира/Изважда две числа (TEXT,MTEXT) и поставя резултата в друг TEXT/MTEXT.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">delblocks</button><span class="short-description">Изтрива дефиниции на блокове.</span></div><div class="full-description-panel"><p>Изтрива избран блок или блокове от файла.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">dims</button><span class="short-description">Създава ориентирана дименсия за Ситуация.</span></div><div class="full-description-panel"><p>Създава стил дименсии за Ситуация (ако няма), слага го като текущ и прави ориентирана дименсия (aligned dimension).</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">DIt</button><span class="short-description">Измерва и записва разстояние в текст.</span></div><div class="full-description-panel"><p>Измерва разстоянието между две точки и го записва в избран TEXT или MTEXT.</p></div></div>
+            <div class="command-entry" data-letter="E"><div class="command-header"><button class="command-button">ETR</button><span class="short-description">Прави ETRANSMIT на текущия файл.</span></div><div class="full-description-panel"><p>Прави ETRANSМIT на отворения файл с възможни 3 настройки.</p></div></div>
+            <div class="command-entry" data-letter="K"><div class="command-header"><button class="command-button">km</button><span class="short-description">Копира текст между различни обекти.</span></div><div class="full-description-panel"><p>Копира текста от txt/mtext/блок/атрибут и го пейства в друг txt/mtext/блок/атрибут.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">label</button><span class="short-description">Поставя надпис по линия.</span></div><div class="full-description-panel"><p>Поставя написан от вас надпис по продължение на Line/Polyline/Curve.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">LoadLineM</button><span class="short-description">Зарежда всички типове линии.</span></div><div class="full-description-panel"><p>Добавя всички стандартни AutoCAD типове линии във файла.</p></div></div>
+            <div class="command-entry" data-letter="M"><div class="command-header"><button class="command-button">MTA</button><span class="short-description">MapTrim на всички обекти.</span></div><div class="full-description-panel"><p>Прави MapTrim (трие и изрязва) на всички обекти във файла извън посочена граница (Map Trim All).</p></div></div>
+            <div class="command-entry" data-letter="M"><div class="command-header"><button class="command-button">MTB</button><span class="short-description">MapTrim на блокове.</span></div><div class="full-description-panel"><p>Същото като MTA, но работи само за блокове (Map Trim Blocks).</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">ncut</button><span class="short-description">Изрязва (Cut) обект от блок.</span></div><div class="full-description-panel"><p>Изрязва обект от блок, без да се налага да се влиза в него (Nested Cut).</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">ndel</button><span class="short-description">Трие обект от блок.</span></div><div class="full-description-panel"><p>Трие обект от блок, без да се налага да се влиза в него (Nested Delete).</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">nmove</button><span class="short-description">Премества обект в блок/Xref.</span></div><div class="full-description-panel"><p>Премества обекти в блокове и XREF, без да се налага да влизате в тях. (Внимание: прави SAVE на Xref-а, дори да е отворен!) (Nested Move).</p></div></div>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">PJ</button><span class="short-description">Подобрен Polyline Join.</span></div><div class="full-description-panel"><p>Свързва линии/полилинии дори да се застъпват леко или да има малко разстояние между тях (Polyline Join).</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qe</button><span class="short-description">Бърза редакция на текст в блокове.</span></div><div class="full-description-panel"><p>Променяте текста на TEXT, MTEXT и атрибути в блокове без да влизате в тях (Quick Edit).</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qec</button><span class="short-description">Бърза смяна на цвят в блокове.</span></div><div class="full-description-panel"><p>Променяте цвета на TEXT, MTEXT и атрибути в блокове без да влизате в тях (Quick Edit Color).</p></div></div>
+            <div class="command-entry" data-letter="S"><div class="command-header"><button class="command-button">slope</button><span class="short-description">Чертае мустаци на откоси.</span></div><div class="full-description-panel"><p>Команда за правене на мустаци на откосите.</p></div></div>
+            <div class="command-entry" data-letter="S"><div class="command-header"><button class="command-button">STRELKA</button><span class="short-description">Поставя стрелка за посока на канавка.</span></div><div class="full-description-panel"><p>Добавя стрелка с посока на канавка, като маркирате линията на канавката и я поставяте спрямо нея (и на офсет), където решите.</p></div></div>
+            <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">TKM</button><span class="short-description">Зарежда типове линии за ТКМ.</span></div><div class="full-description-panel"><p>Добавя всички типови линии свързани с ТКМ.</p></div></div>
+            <div class="command-entry" data-letter="V"><div class="command-header"><button class="command-button">vpol / vpoa</button><span class="short-description">Прехвърля очертания на Viewport в Model.</span></div><div class="full-description-panel"><p>Прехвърля очертанията на Viewport в Model-space. С командата <strong>VPOA</strong> го прави за всички Viewports едновременно.</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">wf</button><span class="short-description">Променя Width Factor на текст.</span></div><div class="full-description-panel"><p>Променя width factor на избран/и текстови обекти.</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">wfb</button><span class="short-description">Променя Width Factor на текст в блок.</span></div><div class="full-description-panel"><p>Променя width factor на текст, който се намира в блок.</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">ww</button><span class="short-description">Отбелязва точки от профил в ситуация.</span></div><div class="full-description-panel"><p>Бързо отбелязване на точки от напречния профил в ситуация, както и нанасяне на кота дъно канавка.</p></div></div>
+        </div>
+
+        <div class="category" data-category="longitudinal-profiles">
+            <h2>Команди за Надлъжни профили</h2>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">addtoblock</button><span class="short-description">Добавя обекти към блок.</span></div><div class="full-description-panel"><p>Вкарва маркирани обекти в съществуващ, маркиран от вас блок.</p></div></div>
+            <div class="command-entry" data-letter="C"><div class="command-header"><button class="command-button">calc</button><span class="short-description">Събира/Изважда стойности от текст.</span></div><div class="full-description-panel"><p>Събира/Изважда две числа (TEXT,MTEXT) и поставя резултата в друг TEXT/MTEXT.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">delblocks</button><span class="short-description">Изтрива дефиниции на блокове.</span></div><div class="full-description-panel"><p>Изтрива избран блок или блокове от файла.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">DIt</button><span class="short-description">Измерва и записва разстояние в текст.</span></div><div class="full-description-panel"><p>Измерва разстоянието между две точки и го записва в избран TEXT или MTEXT.</p></div></div>
+            <div class="command-entry" data-letter="K"><div class="command-header"><button class="command-button">km</button><span class="short-description">Копира текст между различни обекти.</span></div><div class="full-description-panel"><p>Копира текста от txt/mtext/блок/атрибут и го пейства в друг txt/mtext/блок/атрибут.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">Ln</button><span class="short-description">Чертае линия със зададен наклон в %.</span></div><div class="full-description-panel"><p>Чертаете и надписвате линия със зададен от вас наклон в %.</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">ncut</button><span class="short-description">Изрязва (Cut) обект от блок.</span></div><div class="full-description-panel"><p>Изрязва обект от блок, без да се налага да се влиза в него (Nested Cut).</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">ndel</button><span class="short-description">Трие обект от блок.</span></div><div class="full-description-panel"><p>Трие обект от блок, без да се налага да се влиза в него (Nested Delete).</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">nmove</button><span class="short-description">Премества обект в блок/Xref.</span></div><div class="full-description-panel"><p>Премества обекти в блокове и XREF, без да се налага да влизате в тях. (Внимание: прави SAVE на Xref-а, дори да е отворен!) (Nested Move).</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qe</button><span class="short-description">Бърза редакция на текст в блокове.</span></div><div class="full-description-panel"><p>Променяте текста на TEXT, MTEXT и атрибути в блокове без да влизате в тях (Quick Edit).</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qec</button><span class="short-description">Бърза смяна на цвят в блокове.</span></div><div class="full-description-panel"><p>Променяте цвета на TEXT, MTEXT и атрибути в блокове без да влизате в тях (Quick Edit Color).</p></div></div>
+            <div class="command-entry" data-letter="V"><div class="command-header"><button class="command-button">vpol / vpoa</button><span class="short-description">Прехвърля очертания на Viewport в Model.</span></div><div class="full-description-panel"><p>Прехвърля очертанията на Viewport в Model-space. С командата <strong>VPOA</strong> го прави за всички Viewports едновременно.</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">wf</button><span class="short-description">Променя Width Factor на текст.</span></div><div class="full-description-panel"><p>Променя width factor на избран/и текстови обекти.</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">wfb</button><span class="short-description">Променя Width Factor на текст в блок.</span></div><div class="full-description-panel"><p>Променя width factor на текст, който се намира в блок.</p></div></div>
+        </div>
+
+        <div class="category" data-category="cross-sections">
+            <h2>Команди за Напречни профили</h2>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">a3</button><span class="short-description">Изкарване на площи в таблици.</span></div><div class="full-description-panel"><p>Изкарване на оградени площи в напречния профил в таблици.</p></div></div>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">a3a</button><span class="short-description">Изкарване на площи с КМ.</span></div><div class="full-description-panel"><p>Като 'a3', но изкарва всички площи заедно с километража на даден профил наведнъж.</p></div></div>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">a3all</button><span class="short-description">Автоматично попълва таблици с количества.</span></div><div class="full-description-panel"><p>Автоматично попълва таблиците с количества. Използва рамките за Layout-и и взима всичко, което попада в тях.</p></div></div>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">addtoblock</button><span class="short-description">Добавя обекти към блок.</span></div><div class="full-description-panel"><p>Вкарва маркирани обекти в съществуващ, маркиран от вас блок.</p></div></div>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">ATTCH</button><span class="short-description">Оправя тагове на атрибути.</span></div><div class="full-description-panel"><p>Оправя таговете на атрибутската таблица за количества, както са описани във файла Layers.csv.</p></div></div>
+            <div class="command-entry" data-letter="C"><div class="command-header"><button class="command-button">calc</button><span class="short-description">Събира/Изважда стойности от текст.</span></div><div class="full-description-panel"><p>Събира/Изважда две числа (TEXT,MTEXT) и поставя резултата в друг TEXT/MTEXT.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">d3</button><span class="short-description">Пускане на ординати.</span></div><div class="full-description-panel"><p>Пускане на ординати в напречните профили.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">D3all</button><span class="short-description">Автоматично пуска d3 на 1 профил.</span></div><div class="full-description-panel"><p>Пуска автоматично d3-ки на 1 профил, като се маркира целият прoфил. Слоевете за ОП и ЗОП трябва да са конкретни.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">D3all2</button><span class="short-description">Автоматично пуска d3 на много профили.</span></div><div class="full-description-panel"><p>Пуска автоматично d3-ки на n-брой профили, като се маркират рамките за Layout-и. Слоевете за ОП и ЗОП трябва да са конкретни.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">d3RO</button><span class="short-description">Пуска d3-ки за пътни профили.</span></div><div class="full-description-panel"><p>Пуска d3-ки на пътни напречни профили, както последно са уточнени.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">delblocks</button><span class="short-description">Изтрива дефиниции на блокове.</span></div><div class="full-description-panel"><p>Изтрива избран блок или блокове от файла.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">dimc</button><span class="short-description">Създава линейна дименсия за профили.</span></div><div class="full-description-panel"><p>Създава стил дименсии за Напречни профили (ако няма), слага го като текущ и прави линейна дименсия (lineal dimension).</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">DIt</button><span class="short-description">Измерва и записва разстояние в текст.</span></div><div class="full-description-panel"><p>Измерва разстоянието между две точки и го записва в избран TEXT или MTEXT.</p></div></div>
+            <div class="command-entry" data-letter="K"><div class="command-header"><button class="command-button">km</button><span class="short-description">Копира текст между различни обекти.</span></div><div class="full-description-panel"><p>Копира текста от txt/mtext/блок/атрибут и го пейства в друг txt/mtext/блок/атрибут.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">LAQ</button><span class="short-description">Създава слоеве за количества.</span></div><div class="full-description-panel"><p>Създава слоевете за ограждане на количества. Ако искате да добавите нови, направете го във файла Layers.csv в папка TitleBlocks на сървъра.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">Ln</button><span class="short-description">Чертае линия със зададен наклон в %.</span></div><div class="full-description-panel"><p>Чертаете и надписвате линия със зададен от вас наклон в %.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">Lо</button><span class="short-description">Чертае откосна линия (1:n).</span></div><div class="full-description-panel"><p>Чертаете и надписвате откосна линия със зададен от вас наклон - напр. 1:2 (Y:X).</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">naklon</button><span class="short-description">Надписва наклон в %.</span></div><div class="full-description-panel"><p>Надписва наклон в проценти.</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">ncut</button><span class="short-description">Изрязва (Cut) обект от блок.</span></div><div class="full-description-panel"><p>Изрязва обект от блок, без да се налага да се влиза в него (Nested Cut).</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">ndel</button><span class="short-description">Трие обект от блок.</span></div><div class="full-description-panel"><p>Трие обект от блок, без да се налага да се влиза в него (Nested Delete).</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">nmove</button><span class="short-description">Премества обект в блок/Xref.</span></div><div class="full-description-panel"><p>Премества обекти в блокове и XREF, без да се налага да влизате в тях. (Внимание: прави SAVE на Xref-а, дори да е отворен!) (Nested Move).</p></div></div>
+            <div class="command-entry" data-letter="O"><div class="command-header"><button class="command-button">otkos</button><span class="short-description">Надписва наклон на откос 1:n.</span></div><div class="full-description-panel"><p>Надписва наклона на откоса в съотношение 1:n.</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">QB</button><span class="short-description">Ограждане на количества с Boundary.</span></div><div class="full-description-panel"><p>Ограждане на всички количества едно по едно, като изолира нужните слоеве, маркират се обектите, между които да се пусне граница, и се огражда с Boundary. По-надеждно е от QH.</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">QBZ</button><span class="short-description">Автоматично огражда баласт и ЗП.</span></div><div class="full-description-panel"><p>Автоматично огражда площите на нов баласт и защитен пласт. Може да дава грешки при не-добре затворени контури.</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qe</button><span class="short-description">Бърза редакция на текст в блокове.</span></div><div class="full-description-panel"><p>Променяте текста на TEXT, MTEXT и атрибути в блокове без да влизате в тях (Quick Edit).</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qec</button><span class="short-description">Бърза смяна на цвят в блокове.</span></div><div class="full-description-panel"><p>Променяте цвета на TEXT, MTEXT и атрибути в блокове без да влизате в тях (Quick Edit Color).</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">QH (QALL)</button><span class="short-description">Ограждане на количества с Hatch.</span></div><div class="full-description-panel"><p>Ограждане на всички количества едно по едно, като изолира нужните слоеве и огражда като с Hatch (ако контурът не е затворен или има блокове, понякога дава грешки).</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regATT</button><span class="short-description">Регистър от атрибути за КСС.</span></div><div class="full-description-panel"><p>Изкарва в Excel-ска таблица стойностите от таблиците с количества в готов вид за пействане в подробната количествена сметка.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regATT2</button><span class="short-description">Разширен регистър от атрибути.</span></div><div class="full-description-panel"><p>Изкарва в Excel-ска таблица стойностите от таблиците с количества, както и сметките, които по принцип се правят в подробната ведомост.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regAttAll</button><span class="short-description">Регистър атрибути + координати.</span></div><div class="full-description-panel"><p>Изкарва в Excel-ска таблица стойностите от таблиците с количества + X и Y координати на блока.</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">wf</button><span class="short-description">Променя Width Factor на текст.</span></div><div class="full-description-panel"><p>Променя width factor на избран/и текстови обекти.</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">wfb</button><span class="short-description">Променя Width Factor на текст в блок.</span></div><div class="full-description-panel"><p>Променя width factor на текст, който се намира в блок.</p></div></div>
+        </div>
+        
+        <div class="category" data-category="blocks">
+            <h2>Команди за Блокове</h2>
+            <div class="command-entry" data-letter="A"><div class="command-header"><button class="command-button">addtoblock</button><span class="short-description">Добавя обекти към блок.</span></div><div class="full-description-panel"><p>Вкарва маркирани обекти в съществуващ, маркиран от вас блок.</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">delblocks</button><span class="short-description">Изтрива дефиниции на блокове.</span></div><div class="full-description-panel"><p>Изтрива избран блок или блокове от файла.</p></div></div>
+            <div class="command-entry" data-letter="K"><div class="command-header"><button class="command-button">km</button><span class="short-description">Копира текст между различни обекти.</span></div><div class="full-description-panel"><p>Копира текста от txt/mtext/блок/атрибут и го пейства в друг txt/mtext/блок/атрибут.</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">ncut</button><span class="short-description">Изрязва (Cut) обект от блок.</span></div><div class="full-description-panel"><p>Изрязва обект от блок, без да се налага да се влиза в него (Nested Cut).</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">ndel</button><span class="short-description">Трие обект от блок.</span></div><div class="full-description-panel"><p>Трие обект от блок, без да се налага да се влиза в него (Nested Delete).</p></div></div>
+            <div class="command-entry" data-letter="N"><div class="command-header"><button class="command-button">nmove</button><span class="short-description">Премества обект в блок/Xref.</span></div><div class="full-description-panel"><p>Премества обекти в блокове и XREF, без да се налага да влизате в тях. (Внимание: прави SAVE на Xref-а, дори да е отворен!) (Nested Move).</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qe</button><span class="short-description">Бърза редакция на текст в блокове.</span></div><div class="full-description-panel"><p>Променяте текста на TEXT, MTEXT и атрибути в блокове без да влизате в тях (Quick Edit).</p></div></div>
+            <div class="command-entry" data-letter="Q"><div class="command-header"><button class="command-button">qec</button><span class="short-description">Бърза смяна на цвят в блокове.</span></div><div class="full-description-panel"><p>Променяте цвета на TEXT, MTEXT и атрибути в блокове без да влизате в тях (Quick Edit Color).</p></div></div>
+            <div class="command-entry" data-letter="W"><div class="command-header"><button class="command-button">wfb</button><span class="short-description">Променя Width Factor на текст в блок.</span></div><div class="full-description-panel"><p>Променя width factor на текст, който се намира в блок.</p></div></div>
+        </div>
+        
+        <div class="category" data-category="layouts">
+            <h2>Команди за Layouts</h2>
+            <div class="command-entry" data-letter="C"><div class="command-header"><button class="command-button">c2al</button><span class="short-description">Копира обекти във всички лейаути.</span></div><div class="full-description-panel"><p>Копира избран от вас обект/обекти във всички лейаути във файла (Copy To All Layouts).</p></div></div>
+            <div class="command-entry" data-letter="C"><div class="command-header"><button class="command-button">c2l</button><span class="short-description">Копира обекти в избрани лейаути.</span></div><div class="full-description-panel"><p>Копира избран от вас обект/обекти в избрани от вас лейаути във файла (Copy To Layouts).</p></div></div>
+            <div class="command-entry" data-letter="C"><div class="command-header"><button class="command-button">copyVp</button><span class="short-description">Копира Viewports между лейаути.</span></div><div class="full-description-panel"><p>Копира Viewports на надлъжния профил от горни към долни лейаути (когато са направени чрез MAPWSPACE).</p></div></div>
+            <div class="command-entry" data-letter="D"><div class="command-header"><button class="command-button">DATA</button><span class="short-description">Сменя датата на ревизията.</span></div><div class="full-description-panel"><p>Сменя датата на ревизията (ако е направена с fields в dwgproperties).</p></div></div>
+            <div class="command-entry" data-letter="F"><div class="command-header"><button class="command-button">fields</button><span class="short-description">Вмъква динамични полета (Fields).</span></div><div class="full-description-panel"><p>Вкарва динамични полета (Fields) като име на файл, дата на ревизия, ревизия и др.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">Lsteal</button><span class="short-description">Взима Layout-и от друг файл.</span></div><div class="full-description-panel"><p>Команда за взимане на Layout-и от друг файл.</p></div></div>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">podpisi</button><span class="short-description">Вмъква подпис в антетката.</span></div><div class="full-description-panel"><p>С тази команда избирате подпис на проектант, който да вмъкнете в антетката. (Ако проектанта го няма, свържете се, за да бъде добавен).</p></div></div>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">prop</button><span class="short-description">Промяна на DWG Custom Properties.</span></div><div class="full-description-panel"><p>Отваря прозореца за DWG Properties за промяна на custom properties, като дата на ревизия и др.</p></div></div>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">psu</button><span class="short-description">Добавя Imported Page Setup.</span></div><div class="full-description-panel"><p>Добавя Imported Page Setup на избрани или всички Layouts.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">relay</button><span class="short-description">Преименува Layout-ите.</span></div><div class="full-description-panel"><p>Преименува Layout-ите с номерация от 1 до N.</p></div></div>
+            <div class="command-entry" data-letter="S"><div class="command-header"><button class="command-button">selectRWC</button><span class="short-description">Маркира рамки за MAPWSPACE.</span></div><div class="full-description-panel"><p>Маркира последователно по Y координата рамките на напречните профили, за да може да се направят Layout-и с MAPWSPACE.</p></div></div>
+            <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">TabSort</button><span class="short-description">Манипулация на лейаути.</span></div><div class="full-description-panel"><p>Манипулация на лейаутите - Сортиране/Местене/Триене/Слагане на префикс.</p></div></div>
+            <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">ttb</button><span class="short-description">Вмъква антетка (TitleBlock).</span></div><div class="full-description-panel"><p>Вкарва избран от вас, вече създаден за дадения обект, TitleBlock.</p></div></div>
+            <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">ttbhelp</button><span class="short-description">Помощен файл за антетки (TitleBlock).</span></div><div class="full-description-panel"><p>Отваря помощен файл, в който е обяснено всичко за TitleBlock-овете.</p></div></div>
+            <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">ttbu</button><span class="short-description">Ъпдейтва антетка (TitleBlock).</span></div><div class="full-description-panel"><p>Ъпдейтва в отворения файл всичко във вкарания TitleBlock, което не е специфично за всяка фирма или част.</p></div></div>
+            <div class="command-entry" data-letter="V"><div class="command-header"><button class="command-button">vpol / vpoa</button><span class="short-description">Прехвърля очертания на Viewport в Model.</span></div><div class="full-description-panel"><p>Прехвърля очертанията на Viewport в Model-space. С командата <strong>VPOA</strong> го прави за всички Viewports едновременно.</p></div></div>
+        </div>
+
+        <div class="category" data-category="other">
+            <h2>Други команди</h2>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">BatchETR</button><span class="short-description">Прави ETRANSMIT на много файлове.</span></div><div class="full-description-panel"><p>Прави eTransmit на избрани от вас файлове (не пипайте преди да е завършило).</p></div></div>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">BatchPDF</button><span class="short-description">Пакетно създаване на PDF (с диалог).</span></div><div class="full-description-panel"><p>Прави PDF-и на избрани от вас файлове, като пита за всеки един дали искате подписи и къде да го запази.</p></div></div>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">BatchPDF2</button><span class="short-description">Пакетно създаване на PDF (автоматично).</span></div><div class="full-description-panel"><p>Прави PDF-и на избрани от вас файлове, като засича подписи в слой 'Signature' и запазва PDF-а в папката, в която е файла.</p></div></div>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">BS</button><span class="short-description">Ъпдейтва блокове с атрибути (ATTSYNC).</span></div><div class="full-description-panel"><p>Ъпдейтва блокове с атрибути (изпълнява ATTSYNC).</p></div></div>
+            <div class="command-entry" data-letter="E"><div class="command-header"><button class="command-button">ETR</button><span class="short-description">Прави ETRANSMIT на текущия файл.</span></div><div class="full-description-panel"><p>Прави eTransmit на отворения файл, като ви дава 3 опции.</p></div></div>
+            <div class="command-entry" data-letter="G"><div class="command-header"><button class="command-button">getv</button><span class="short-description">Версия на AutoCAD на текущия файл.</span></div><div class="full-description-panel"><p>Показва с коя версия на AutoCAD е записан текущият файл.</p></div></div>
+            <div class="command-entry" data-letter="G"><div class="command-header"><button class="command-button">getversions</button><span class="short-description">Версия на AutoCAD на избран файл.</span></div><div class="full-description-panel"><p>Показва с коя версия на AutoCAD е записан избран от вас файл.</p></div></div>
+            <div class="command-entry" data-letter="K"><div class="command-header"><button class="command-button">kmAll</button><span class="short-description">Надписва километраж/кота на пресичания.</span></div><div class="full-description-panel"><p>При нови изкарани от CIVIL пресичания в надлъжен профил и ситуация, надписва километража, а за дренаж надписва кота.</p></div></div>
+            <div class="command-entry" data-letter="K"><div class="command-header"><button class="command-button">kmDel</button><span class="short-description">Като 'km', но трие източника.</span></div><div class="full-description-panel"><p>Работи като 'km', само че ако текстът, който се копира, е в цвят 40, го трие.</p></div></div>
+            <div class="command-entry" data-letter="L"><div class="command-header"><button class="command-button">LayerChange</button><span class="short-description">Преименува слоеве по списък.</span></div><div class="full-description-panel"><p>Променя имената на слоеве, описани във файла 'Layers - change Names.csv', в актуалните им имена.</p></div></div>
+            <div class="command-entry" data-letter="M"><div class="command-header"><button class="command-button">meters</button><span class="short-description">Задава DWGUNITS на метри.</span></div><div class="full-description-panel"><p>Прави DWGUNITS в метри. Полезно, когато имате проблем с копирането с базова точка и импортването на блокове и Xref.</p></div></div>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">pcoord</button><span class="short-description">Изкарва координати на точки във файл.</span></div><div class="full-description-panel"><p>Изкарва във файл координати на посочени от вас точки, като ги именувате една по една.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regAttAll</button><span class="short-description">Изкарва всички атрибути с координати.</span></div><div class="full-description-panel"><p>Изкарва всички атрибути заедно с координатите на блока.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">RTL</button><span class="short-description">Завърта текст спрямо линия.</span></div><div class="full-description-panel"><p>Завърта TEXT и MTEXT спрямо линия или полилиния (Rotate Text to Line).</p></div></div>
+            <div class="command-entry" data-letter="S"><div class="command-header"><button class="command-button">showLayers</button><span class="short-description">Визуализира всички слоеве.</span></div><div class="full-description-panel"><p>Изчертава линии и имената на всички слоеве, които съществуват във файла.</p></div></div>
+            <div class="command-entry" data-letter="T"><div class="command-header"><button class="command-button">template</button><span class="short-description">Отваря папката с темплейти.</span></div><div class="full-description-panel"><p>Отваря папката, в която се намират темплейт файловете за AutoCAD, CIVIL и за правене на лейаути.</p></div></div>
+        </div>
+
+        <div class="category" data-category="civil">
+            <h2>Команди за Civil 3D</h2>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">bExp</button><span class="short-description">Експорт на данни за блокове.</span></div><div class="full-description-panel"><p>Изкарва mtext/записва във файл: име на атрибут, километраж, кота гл. релса, офсет и координати на маркирани блокове.</p></div></div>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">bExp2</button><span class="short-description">Експорт на данни за блокове (без профил).</span></div><div class="full-description-panel"><p>Изкарва mtext/записва във файл: име на атрибут, километраж, офсет и координати на маркирани блокове (не е нужен надлъжен профил).</p></div></div>
+            <div class="command-entry" data-letter="C"><div class="command-header"><button class="command-button">cPExp</button><span class="short-description">Изкарва регистър на репери от Cogo точки.</span></div><div class="full-description-panel"><p>Изкарва регистър на реперите от Civil 3D Cogo точки. Маркира се алаймънт и всички Cogo точки.</p></div></div>
+            <div class="command-entry" data-letter="F"><div class="command-header"><button class="command-button">flkm</button><span class="short-description">Преименува Feature Line с нов КМ.</span></div><div class="full-description-panel"><p>Преименува Feature Line с новия километраж, ако е имало прекилометриране или са със стари имена.</p></div></div>
+            <div class="command-entry" data-letter="G"><div class="command-header"><button class="command-button">GRR</button><span class="short-description">Прави Breaklines/Boundary от точки по ос.</span></div><div class="full-description-panel"><p>Прави Breaklines и Boundary от Cogo точки за направата на повърхнина на съществуваща главна релса. Маркира се оста, на която искаме да направим Surface.</p></div></div>
+            <div class="command-entry" data-letter="G"><div class="command-header"><button class="command-button">GRR2</button><span class="short-description">Прави Breaklines/Boundary от маркирани точки.</span></div><div class="full-description-panel"><p>Като GRR, само че тук се маркират самите точки. Когато има големи криви, трябва да се прави на части, защото при голямо закръгление дава грешки.</p></div></div>
+            <div class="command-entry" data-letter="K"><div class="command-header"><button class="command-button">kmATT</button><span class="short-description">Километрира атрибутски блокове.</span></div><div class="full-description-panel"><p>Километрира атрибутски блок спрямо неговата Insert Point. Трябва да маркирате блоковете, Alignment-а и да напишете таг-а на атрибута за километраж.</p></div></div>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">pExp</button><span class="short-description">Експорт на данни за избрани точки.</span></div><div class="full-description-panel"><p>Изкарва mtext/записва във файл: име на точка (въвежда се от вас), километраж, кота гл. релса, офсет и координати на точки, избрани от вас с мишката.</p></div></div>
+            <div class="command-entry" data-letter="S"><div class="command-header"><button class="command-button">s2f</button><span class="short-description">Sample Line към Feature Line.</span></div><div class="full-description-panel"><p>Прави Feature линии на всички или на маркирани Sample Lines. Имената и стиловете са предварително зададени във файла SampleLineGroups.csv (Sample to Feature).</p></div></div>
+            <div class="command-entry" data-letter="S"><div class="command-header"><button class="command-button">s2p</button><span class="short-description">Sample Line към Polyline.</span></div><div class="full-description-panel"><p>Прави от маркирана Sample Line полилиния, като я вкарва в слоя на Sample Line-а (Sample to Polyline).</p></div></div>
+            <div class="command-entry" data-letter="S"><div class="command-header"><button class="command-button">slg</button><span class="short-description">Създава Sample Line Groups.</span></div><div class="full-description-panel"><p>Правене на предварително зададени SampleLine Groups.</p></div></div>
+        </div>
+        
+        <div class="category" data-category="registers">
+            <h2>Команди за Регистри (Civil 3D)</h2>
+            <div class="command-entry" data-letter="B"><div class="command-header"><button class="command-button">bExp</button><span class="short-description">Експорт на данни за блокове.</span></div><div class="full-description-panel"><p>Изкарва mtext/записва във файл: име на атрибут, километраж, кота гл. релса, офсет и координати на маркирани блокове.</p></div></div>
+            <div class="command-entry" data-letter="C"><div class="command-header"><button class="command-button">cPExp</button><span class="short-description">Изкарва регистър на репери от Cogo точки.</span></div><div class="full-description-panel"><p>Изкарва регистър на реперите от Civil 3D Cogo точки. Маркира се алаймънт и всички Cogo точки.</p></div></div>
+            <div class="command-entry" data-letter="P"><div class="command-header"><button class="command-button">pExp</button><span class="short-description">Експорт на данни за избрани точки.</span></div><div class="full-description-panel"><p>Изкарва mtext/записва във файл: име на точка (въвежда се от вас), километраж, кота гл. релса, офсет и координати на точки, избрани от вас с мишката.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regC</button><span class="short-description">Изкарва Координатен регистър (ЖП).</span></div><div class="full-description-panel"><p>Изкарва Координатен регистър във файл в същата папка. Маркирате алаймънт, нивелета, разстояние м/у точките, както и допълнителни точки като начало на стрелка.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regCro</button><span class="short-description">Изкарва Координатен регистър (Път).</span></div><div class="full-description-panel"><p>Изкарва Координатен регистър на Път във файл в същата папка.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regH</button><span class="short-description">Изкарва регистър в План (ЖП).</span></div><div class="full-description-panel"><p>Изкарва регистър в План във файл в същата папка. Маркирате алаймънт.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regHro</button><span class="short-description">Изкарва регистър в План (Път).</span></div><div class="full-description-panel"><p>Изкарва регистър в План на Път във файл в същата папка.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regS</button><span class="short-description">Изкарва регистър на стрелките.</span></div><div class="full-description-panel"><p>Изкарва регистър на стрелките във файл в същата папка. Маркирате стрелките (трябва да са динамичните блокове от ППС), алаймънт и нивелета.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regS2</button><span class="short-description">Изкарва регистър на стрелки (стара подредба).</span></div><div class="full-description-panel"><p>Като regS, само че изважда стрелки и по отклонение (за ИННО) - подредбата е старата: четни - нечетни.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regV</button><span class="short-description">Изкарва регистър в Профил (ЖП).</span></div><div class="full-description-panel"><p>Изкарва регистър в Профил във файл в същата папка. Маркирате алаймънт и избирате нивелетата, за която да се изкара регистърът.</p></div></div>
+            <div class="command-entry" data-letter="R"><div class="command-header"><button class="command-button">regVro</button><span class="short-description">Изкарва регистър в Профил (Път).</span></div><div class="full-description-panel"><p>Изкарва регистър в Профил на Път във файл в същата папка.</p></div></div>
+        </div>
+    </div>
+
+    <!-- Модални прозорци за предложения -->
+    <div id="suggestion-form-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <h2>Направи предложение</h2>
+            <form id="suggestion-form">
+                <label for="suggester-name">Име:</label>
+                <input type="text" id="suggester-name" required>
+                <label for="suggestion-text">Предложение:</label>
+                <textarea id="suggestion-text" required></textarea>
+                <button type="submit">Изпрати</button>
+            </form>
+        </div>
+    </div>
+    <div id="suggestions-list-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <h2>Списък с предложения</h2>
+            <div id="suggestions-list"></div>
+        </div>
+    </div>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // <<< ВАШАТА FIREBASE КОНФИГУРАЦИЯ Е ПОСТАВЕНА ТУК >>>
+        const firebaseConfig = {
+          apiKey: "AIzaSyACB9shT_VTr3PGW_1nFjJCGAgwSI55Omw",
+          authDomain: "clickcount-a6e46.firebaseapp.com",
+          databaseURL: "https://clickcount-a6e46-default-rtdb.firebaseio.com",
+          projectId: "clickcount-a6e46",
+          storageBucket: "clickcount-a6e46.appspot.com",
+          messagingSenderId: "53304151952",
+          appId: "1:53304151952:web:ed0c365ace6b1232842d15",
+          measurementId: "G-5S028177MG"
+        };
+
+        // Инициализация на Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const suggestionsRef = db.ref("suggestions");
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Функция за проверка на администраторски права ---
+            const isAdmin = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('admin') === 'true';
+            };
+            const adminMode = isAdmin();
+
+            // Елементи за предложения
+            const addSuggestionBtn = document.getElementById('add-suggestion-btn');
+            const viewSuggestionsBtn = document.getElementById('view-suggestions-btn');
+            const suggestionFormModal = document.getElementById('suggestion-form-modal');
+            const suggestionsListModal = document.getElementById('suggestions-list-modal');
+            const suggestionForm = document.getElementById('suggestion-form');
+            const suggestionsListDiv = document.getElementById('suggestions-list');
+            const suggestionCountSpan = document.getElementById('suggestion-count');
+            const closeButtons = document.querySelectorAll('.close-button');
+
+            const renderSuggestions = (snapshot) => {
+                suggestionsListDiv.innerHTML = '';
+                suggestionCountSpan.textContent = snapshot.numChildren();
+                if (!snapshot.exists()) {
+                    suggestionsListDiv.innerHTML = '<p>Все още няма подадени предложения.</p>';
+                    return;
+                }
+                snapshot.forEach(childSnapshot => {
+                    const key = childSnapshot.key;
+                    const suggestion = childSnapshot.val();
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    
+                    const statusBtn = document.createElement('button');
+                    statusBtn.className = 'status-toggle';
+                    statusBtn.dataset.id = key;
+                    if (suggestion.status === 'done') {
+                        statusBtn.textContent = '✅ Направено';
+                        statusBtn.classList.add('is-done');
+                    } else {
+                        statusBtn.textContent = '❌ Не е направено';
+                        statusBtn.classList.add('is-pending');
+                    }
+                    if (adminMode) {
+                        statusBtn.classList.add('admin-enabled');
+                    }
+                    
+                    item.innerHTML = `
+                        <div class="suggestion-details">
+                            <p class="suggester-name">${suggestion.name || 'Анонимен'}:</p>
+                            <p class="suggestion-text">${suggestion.text}</p>
+                        </div>`;
+                    item.appendChild(statusBtn);
+                    suggestionsListDiv.appendChild(item);
+                });
+            };
+
+            // Слушател за промени в базата данни
+            suggestionsRef.orderByChild("timestamp").on("value", renderSuggestions);
+
+            // Управление на модални прозорци
+            addSuggestionBtn.addEventListener('click', () => { suggestionFormModal.style.display = 'block'; });
+            viewSuggestionsBtn.addEventListener('click', () => { suggestionsListModal.style.display = 'block'; });
+            closeButtons.forEach(btn => btn.addEventListener('click', () => {
+                suggestionFormModal.style.display = 'none';
+                suggestionsListModal.style.display = 'none';
+            }));
+            window.addEventListener('click', (event) => {
+                if (event.target == suggestionFormModal || event.target == suggestionsListModal) {
+                    suggestionFormModal.style.display = 'none';
+                    suggestionsListModal.style.display = 'none';
+                }
+            });
+
+            // Форма за предложения
+            suggestionForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('suggester-name').value;
+                const text = document.getElementById('suggestion-text').value;
+                if (!text.trim()) { alert('Моля, въведете текст на предложението.'); return; }
+                
+                suggestionsRef.push({
+                    name: name.trim() || 'Анонимен',
+                    text: text.trim(),
+                    status: 'pending',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    suggestionForm.reset();
+                    suggestionFormModal.style.display = 'none';
+                    alert('Благодарим за предложението!');
+                }).catch((error) => console.error("Грешка при запис: ", error));
+            });
+            
+            // Промяна на статус
+            suggestionsListDiv.addEventListener('click', (e) => {
+                if (e.target.classList.contains('status-toggle') && adminMode) {
+                    const id = e.target.dataset.id;
+                    const docRef = suggestionsRef.child(id);
+                    docRef.get().then((snapshot) => {
+                        if (snapshot.exists()) {
+                            const newStatus = snapshot.val().status === 'pending' ? 'done' : 'pending';
+                            docRef.update({ status: newStatus });
+                        }
+                    });
+                }
+            });
+
+            // --- ЛОГИКА ЗА ФИЛТРИ И ПАДАЩИ ПАНЕЛИ ---
+            const alphabetFilter = document.getElementById('alphabet-filter');
+            const categories = document.querySelectorAll('.category');
+            const commandEntries = document.querySelectorAll('.command-entry');
+            const commandHeaders = document.querySelectorAll('.command-header');
+
+            alphabetFilter.addEventListener('click', function(e) {
+                const button = e.target.closest('.filter-button');
+                if (!button) return;
+
+                const filter = button.dataset.filter.toUpperCase();
+
+                // Управление на активния бутон
+                alphabetFilter.querySelector('.active').classList.remove('active');
+                button.classList.add('active');
+
+                // Филтриране на командите
+                commandEntries.forEach(entry => {
+                    const letter = entry.dataset.letter.toUpperCase();
+                    if (filter === 'ALL' || letter === filter) {
+                        entry.classList.remove('hidden');
+                    } else {
+                        entry.classList.add('hidden');
+                    }
+                });
+
+                // Скриване на празни категории
+                categories.forEach(category => {
+                    const visibleEntries = category.querySelectorAll('.command-entry:not(.hidden)');
+                    if (visibleEntries.length === 0) {
+                        category.classList.add('hidden');
+                    } else {
+                        category.classList.remove('hidden');
+                    }
+                });
+            });
+
+            commandHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const button = this.querySelector('.command-button');
+                    const currentPanel = this.nextElementSibling;
+                    document.querySelectorAll('.full-description-panel.show').forEach(panel => {
+                        if (panel !== currentPanel) {
+                            panel.classList.remove('show');
+                            panel.previousElementSibling.querySelector('.command-button').classList.remove('active');
+                        }
+                    });
+                    currentPanel.classList.toggle('show');
+                    button.classList.toggle('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
