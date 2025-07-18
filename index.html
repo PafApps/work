@@ -413,7 +413,9 @@
                     const letter = entry.dataset.letter.toUpperCase();
                     
                     const isCategoryVisible = (activeCategory === 'all' || activeCategory === category);
-                    const isLetterVisible = (activeLetter === 'all' || activeLetter === letter);
+                    // --- КОРЕКЦИЯ: Тук беше грешката ---
+                    // Сравняваме с 'ALL' (главни букви), защото преобразуваме data-filter към главни букви.
+                    const isLetterVisible = (activeLetter === 'ALL' || activeLetter === letter);
 
                     entry.classList.toggle('hidden', !(isCategoryVisible && isLetterVisible));
                 });
