@@ -397,7 +397,7 @@
                 }
             });
 
-            // --- КОРЕГИРАНА ЛОГИКА ЗА ФИЛТРИ ---
+            // --- КОРЕГИРАНА И ФИНАЛНА ЛОГИКА ЗА ФИЛТРИ ---
             const alphabetFilter = document.getElementById('alphabet-filter');
             const categoryFilter = document.getElementById('category-filter');
             const categories = document.querySelectorAll('.category');
@@ -416,12 +416,22 @@
                     const letterMatch = (currentAlphabetFilter === 'all' || letter === currentAlphabetFilter);
                     const categoryMatch = (currentCategoryFilter === 'all' || category === currentCategoryFilter);
 
-                    entry.classList.toggle('hidden', !(letterMatch && categoryMatch));
+                    // Командата е видима, само ако отговаря и на двата филтъра едновременно
+                    if (letterMatch && categoryMatch) {
+                        entry.classList.remove('hidden');
+                    } else {
+                        entry.classList.add('hidden');
+                    }
                 });
                 
+                // След като сме определили видимостта на командите, проверяваме кои категории са останали празни
                 categories.forEach(category => {
                     const visibleEntries = category.querySelectorAll('.command-entry:not(.hidden)');
-                    category.classList.toggle('hidden', visibleEntries.length === 0);
+                    if (visibleEntries.length > 0) {
+                        category.classList.remove('hidden');
+                    } else {
+                        category.classList.add('hidden');
+                    }
                 });
             };
 
