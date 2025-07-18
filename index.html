@@ -31,6 +31,10 @@
         #suggestions-list .status-toggle.is-done { background-color: #e6f4ea; color: #137333; }
         #suggestions-list .status-toggle.admin-enabled { cursor: pointer; }
         #suggestions-list .status-toggle:not(.admin-enabled) { cursor: not-allowed; opacity: 0.7; }
+        .new-command-section { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #ddd; }
+        .new-command-section .label { color: #555; font-size: 14px; }
+        .new-command-section input[type="text"] { width: 95%; padding: 6px; border-radius: 4px; border: 1px solid #ccc; margin-top: 4px; }
+        .new-command-section .command-name { font-weight: bold; font-size: 1.1em; color: #1d3557; margin-top: 4px;}
         .filters-container { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e1e1e1; }
         #category-filter, #alphabet-filter { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; }
         .filter-button { background-color: #a8dadc; color: #1d3557; border: none; border-radius: 4px; padding: 5px 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
@@ -293,11 +297,7 @@
         const suggestionsRef = db.ref("suggestions");
 
         document.addEventListener('DOMContentLoaded', function() {
-            // --- Функция за проверка на администраторски права ---
-            const isAdmin = () => {
-                const urlParams = new URLSearchParams(window.location.search);
-                return urlParams.get('admin') === 'true';
-            };
+            const isAdmin = () => new URLSearchParams(window.location.search).get('admin') === 'true';
             const adminMode = isAdmin();
 
             // Елементи за предложения
@@ -323,6 +323,34 @@
                     const item = document.createElement('div');
                     item.className = 'suggestion-item';
                     
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'suggestion-details';
+                    detailsDiv.innerHTML = `
+                        <p class="suggester-name">${suggestion.name || 'Анонимен'}:</p>
+                        <p class="suggestion-text">${suggestion.text}</p>`;
+
+                    if (suggestion.status === 'done') {
+                        const newCommandDiv = document.createElement('div');
+                        newCommandDiv.className = 'new-command-section';
+
+                        if (adminMode) {
+                            newCommandDiv.innerHTML = `<p class="label">Нова команда:</p>`;
+                            const commandInput = document.createElement('input');
+                            commandInput.type = 'text';
+                            commandInput.value = suggestion.newCommandName || '';
+                            commandInput.placeholder = 'Въведете името на командата';
+                            commandInput.dataset.id = key;
+                            newCommandDiv.appendChild(commandInput);
+                        } else {
+                            newCommandDiv.innerHTML = `
+                                <p class="label">Нова команда:</p>
+                                <p class="command-name">${suggestion.newCommandName || '(няма зададена)'}</p>`;
+                        }
+                        detailsDiv.appendChild(newCommandDiv);
+                    }
+
+                    item.appendChild(detailsDiv);
+
                     const statusBtn = document.createElement('button');
                     statusBtn.className = 'status-toggle';
                     statusBtn.dataset.id = key;
@@ -333,24 +361,15 @@
                         statusBtn.textContent = '❌ Не е направено';
                         statusBtn.classList.add('is-pending');
                     }
-                    if (adminMode) {
-                        statusBtn.classList.add('admin-enabled');
-                    }
+                    if (adminMode) statusBtn.classList.add('admin-enabled');
                     
-                    item.innerHTML = `
-                        <div class="suggestion-details">
-                            <p class="suggester-name">${suggestion.name || 'Анонимен'}:</p>
-                            <p class="suggestion-text">${suggestion.text}</p>
-                        </div>`;
                     item.appendChild(statusBtn);
                     suggestionsListDiv.appendChild(item);
                 });
             };
 
-            // Слушател за промени в базата данни
             suggestionsRef.orderByChild("timestamp").on("value", renderSuggestions);
 
-            // Управление на модални прозорци
             addSuggestionBtn.addEventListener('click', () => { suggestionFormModal.style.display = 'block'; });
             viewSuggestionsBtn.addEventListener('click', () => { suggestionsListModal.style.display = 'block'; });
             closeButtons.forEach(btn => btn.addEventListener('click', () => {
@@ -364,7 +383,6 @@
                 }
             });
 
-            // Форма за предложения
             suggestionForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const name = document.getElementById('suggester-name').value;
@@ -383,7 +401,6 @@
                 }).catch((error) => console.error("Грешка при запис: ", error));
             });
             
-            // Промяна на статус
             suggestionsListDiv.addEventListener('click', (e) => {
                 if (e.target.classList.contains('status-toggle') && adminMode) {
                     const id = e.target.dataset.id;
@@ -396,6 +413,15 @@
                     });
                 }
             });
+            
+            suggestionsListDiv.addEventListener('blur', (e) => {
+                if (e.target.tagName === 'INPUT' && e.target.closest('.new-command-section') && adminMode) {
+                    const id = e.target.dataset.id;
+                    const newName = e.target.value.trim();
+                    suggestionsRef.child(id).update({ newCommandName: newName })
+                        .catch(error => console.error("Грешка при запис на името на командата:", error));
+                }
+            }, true);
 
             // --- ЛОГИКА ЗА ФИЛТРИ И ПАДАЩИ ПАНЕЛИ ---
             const categoryFilter = document.getElementById('category-filter');
@@ -413,8 +439,6 @@
                     const letter = entry.dataset.letter.toUpperCase();
                     
                     const isCategoryVisible = (activeCategory === 'all' || activeCategory === category);
-                    // --- КОРЕКЦИЯ: Тук беше грешката ---
-                    // Сравняваме с 'ALL' (главни букви), защото преобразуваме data-filter към главни букви.
                     const isLetterVisible = (activeLetter === 'ALL' || activeLetter === letter);
 
                     entry.classList.toggle('hidden', !(isCategoryVisible && isLetterVisible));
