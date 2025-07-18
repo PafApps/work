@@ -248,7 +248,7 @@
         </div>
     </div>
 
-        <!-- Модални прозорци за предложения -->
+           <!-- Модални прозорци за предложения -->
     <div id="suggestion-form-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">×</span>
@@ -410,28 +410,19 @@
             const applyFilters = () => {
                 commandEntries.forEach(entry => {
                     const letter = entry.dataset.letter.toUpperCase();
-                    const categoryDiv = entry.closest('.category');
-                    const category = categoryDiv ? categoryDiv.dataset.category : null;
+                    const category = entry.closest('.category').dataset.category;
 
                     const letterMatch = (currentAlphabetFilter === 'all' || letter === currentAlphabetFilter);
                     const categoryMatch = (currentCategoryFilter === 'all' || category === currentCategoryFilter);
 
-                    // Командата е видима, само ако отговаря и на двата филтъра едновременно
-                    if (letterMatch && categoryMatch) {
-                        entry.classList.remove('hidden');
-                    } else {
-                        entry.classList.add('hidden');
-                    }
+                    // Използваме style.display за по-директен контрол
+                    entry.style.display = (letterMatch && categoryMatch) ? '' : 'none';
                 });
                 
-                // След като сме определили видимостта на командите, проверяваме кои категории са останали празни
                 categories.forEach(category => {
-                    const visibleEntries = category.querySelectorAll('.command-entry:not(.hidden)');
-                    if (visibleEntries.length > 0) {
-                        category.classList.remove('hidden');
-                    } else {
-                        category.classList.add('hidden');
-                    }
+                    // Проверяваме дали има видими деца след филтрирането
+                    const visibleEntries = category.querySelector('.command-entry:not([style*="display: none"])');
+                    category.style.display = visibleEntries ? '' : 'none';
                 });
             };
 
