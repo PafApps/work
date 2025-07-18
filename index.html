@@ -383,57 +383,41 @@
                 }
             });
 
-            // --- КОРЕГИРАНА И ФИНАЛНА ЛОГИКА ЗА ФИЛТРИ ---
+            // --- ЛОГИКА ЗА ФИЛТРИ И ПАДАЩИ ПАНЕЛИ ---
             const alphabetFilter = document.getElementById('alphabet-filter');
-            const categoryFilter = document.getElementById('category-filter');
             const categories = document.querySelectorAll('.category');
             const commandEntries = document.querySelectorAll('.command-entry');
             const commandHeaders = document.querySelectorAll('.command-header');
 
-            let currentAlphabetFilter = 'all';
-            let currentCategoryFilter = 'all';
+            alphabetFilter.addEventListener('click', function(e) {
+                const button = e.target.closest('.filter-button');
+                if (!button) return;
 
-            const applyFilters = () => {
+                const filter = button.dataset.filter.toUpperCase();
+
+                // Управление на активния бутон
+                alphabetFilter.querySelector('.active').classList.remove('active');
+                button.classList.add('active');
+
+                // Филтриране на командите
                 commandEntries.forEach(entry => {
                     const letter = entry.dataset.letter.toUpperCase();
-                    const category = entry.closest('.category').dataset.category;
-
-                    const letterMatch = (currentAlphabetFilter === 'all' || letter === currentAlphabetFilter);
-                    const categoryMatch = (currentCategoryFilter === 'all' || category === currentCategoryFilter);
-
-                    if (letterMatch && categoryMatch) {
+                    if (filter === 'ALL' || letter === filter) {
                         entry.classList.remove('hidden');
                     } else {
                         entry.classList.add('hidden');
                     }
                 });
-                
+
+                // Скриване на празни категории
                 categories.forEach(category => {
-                    const hasVisibleChildren = category.querySelector('.command-entry:not(.hidden)');
-                    if (hasVisibleChildren) {
-                        category.classList.remove('hidden');
-                    } else {
+                    const visibleEntries = category.querySelectorAll('.command-entry:not(.hidden)');
+                    if (visibleEntries.length === 0) {
                         category.classList.add('hidden');
+                    } else {
+                        category.classList.remove('hidden');
                     }
                 });
-            };
-
-            alphabetFilter.addEventListener('click', function(e) {
-                const button = e.target.closest('.filter-button');
-                if (!button) return;
-                currentAlphabetFilter = button.dataset.filter.toUpperCase();
-                alphabetFilter.querySelector('.active').classList.remove('active');
-                button.classList.add('active');
-                applyFilters();
-            });
-            
-            categoryFilter.addEventListener('click', function(e) {
-                const button = e.target.closest('.filter-button');
-                if (!button) return;
-                currentCategoryFilter = button.dataset.filter;
-                categoryFilter.querySelector('.active').classList.remove('active');
-                button.classList.add('active');
-                applyFilters();
             });
 
             commandHeaders.forEach(header => {
