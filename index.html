@@ -31,7 +31,8 @@
         #suggestions-list .status-toggle.is-done { background-color: #e6f4ea; color: #137333; }
         #suggestions-list .status-toggle.admin-enabled { cursor: pointer; }
         #suggestions-list .status-toggle:not(.admin-enabled) { cursor: not-allowed; opacity: 0.7; }
-        #alphabet-filter { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e1e1e1; }
+        .filters-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e1e1e1; }
+        #alphabet-filter, #category-filter { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; }
         .filter-button { background-color: #a8dadc; color: #1d3557; border: none; border-radius: 4px; padding: 5px 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
         .filter-button:hover { background-color: #457b9d; color: white; transform: translateY(-2px); }
         .filter-button.active { background-color: #1d3557; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
@@ -61,9 +62,22 @@
         <h1>Интерактивен списък на AutoLISP команди</h1>
         <h3>Намерени общо 86 уникални команди, разпределени в категории</h3>
 
-        <div id="alphabet-filter">
-            <button class="filter-button active" data-filter="all">ВСИЧКИ</button>
-            <script>document.write(Array.from(Array(26)).map((e, i) => `<button class="filter-button" data-filter="${String.fromCharCode(i + 65)}">${String.fromCharCode(i + 65)}</button>`).join(''));</script>
+        <div class="filters-container">
+            <div id="alphabet-filter">
+                <button class="filter-button active" data-filter="all">ВСИЧКИ БУКВИ</button>
+                <script>document.write(Array.from(Array(26)).map((e, i) => `<button class="filter-button" data-filter="${String.fromCharCode(i + 65)}">${String.fromCharCode(i + 65)}</button>`).join(''));</script>
+            </div>
+            <div id="category-filter">
+                <button class="filter-button active" data-filter="all">ВСИЧКИ КАТЕГОРИИ</button>
+                <button class="filter-button" data-filter="situation">Ситуация</button>
+                <button class="filter-button" data-filter="longitudinal-profiles">Надлъжни</button>
+                <button class="filter-button" data-filter="cross-sections">Напречни</button>
+                <button class="filter-button" data-filter="blocks">Блокове</button>
+                <button class="filter-button" data-filter="layouts">Layouts</button>
+                <button class="filter-button" data-filter="other">Други</button>
+                <button class="filter-button" data-filter="civil">Civil 3D</button>
+                <button class="filter-button" data-filter="registers">Регистри</button>
+            </div>
         </div>
         
         <div class="category" data-category="situation">
@@ -383,28 +397,50 @@
                 }
             });
 
-            // Логика за филтър и падащи панели
-            const filterContainer = document.getElementById('alphabet-filter');
+            // Логика за филтри и падащи панели
+            const alphabetFilter = document.getElementById('alphabet-filter');
+            const categoryFilter = document.getElementById('category-filter');
             const categories = document.querySelectorAll('.category');
             const commandEntries = document.querySelectorAll('.command-entry');
             const commandHeaders = document.querySelectorAll('.command-header');
 
-            filterContainer.addEventListener('click', function(e) {
-                const button = e.target.closest('.filter-button');
-                if (!button) return;
-                const filter = button.dataset.filter.toUpperCase();
-                filterContainer.querySelector('.active').classList.remove('active');
-                button.classList.add('active');
+            let currentAlphabetFilter = 'all';
+            let currentCategoryFilter = 'all';
 
+            const applyFilters = () => {
                 commandEntries.forEach(entry => {
                     const letter = entry.dataset.letter.toUpperCase();
-                    entry.classList.toggle('hidden', !(filter === 'ALL' || letter === filter));
+                    const categoryDiv = entry.closest('.category');
+                    const category = categoryDiv ? categoryDiv.dataset.category : null;
+
+                    const letterMatch = (currentAlphabetFilter === 'all' || letter === currentAlphabetFilter);
+                    const categoryMatch = (currentCategoryFilter === 'all' || category === currentCategoryFilter);
+
+                    entry.classList.toggle('hidden', !(letterMatch && categoryMatch));
                 });
                 
                 categories.forEach(category => {
                     const visibleEntries = category.querySelectorAll('.command-entry:not(.hidden)');
                     category.classList.toggle('hidden', visibleEntries.length === 0);
                 });
+            };
+
+            alphabetFilter.addEventListener('click', function(e) {
+                const button = e.target.closest('.filter-button');
+                if (!button) return;
+                currentAlphabetFilter = button.dataset.filter.toUpperCase();
+                alphabetFilter.querySelector('.active').classList.remove('active');
+                button.classList.add('active');
+                applyFilters();
+            });
+            
+            categoryFilter.addEventListener('click', function(e) {
+                const button = e.target.closest('.filter-button');
+                if (!button) return;
+                currentCategoryFilter = button.dataset.filter;
+                categoryFilter.querySelector('.active').classList.remove('active');
+                button.classList.add('active');
+                applyFilters();
             });
 
             commandHeaders.forEach(header => {
