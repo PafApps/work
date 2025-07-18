@@ -35,7 +35,6 @@
         .new-command-section .label { color: #555; font-size: 14px; }
         .new-command-section input[type="text"] { width: 95%; padding: 6px; border-radius: 4px; border: 1px solid #ccc; margin-top: 4px; }
         .new-command-section .command-name { font-weight: bold; font-size: 1.1em; color: #1d3557; margin-top: 4px;}
-        .new-command-section .suggester-credit { font-weight: bold; color: #1d3557; margin-top: 5px; margin-bottom: 5px; font-size: 1.1em; }
         .filters-container { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e1e1e1; }
         #category-filter, #alphabet-filter { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; }
         .filter-button { background-color: #a8dadc; color: #1d3557; border: none; border-radius: 4px; padding: 5px 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
@@ -301,6 +300,7 @@
             const isAdmin = () => new URLSearchParams(window.location.search).get('admin') === 'true';
             const adminMode = isAdmin();
 
+            // Елементи за предложения
             const addSuggestionBtn = document.getElementById('add-suggestion-btn');
             const viewSuggestionsBtn = document.getElementById('view-suggestions-btn');
             const suggestionFormModal = document.getElementById('suggestion-form-modal');
@@ -333,12 +333,8 @@
                         const newCommandDiv = document.createElement('div');
                         newCommandDiv.className = 'new-command-section';
 
-                        newCommandDiv.innerHTML = `
-                            <p class="label">Нова команда, направена от:</p>
-                            <p class="suggester-credit">${suggestion.name || 'Анонимен'}</p>
-                        `;
-
                         if (adminMode) {
+                            newCommandDiv.innerHTML = `<p class="label">Нова команда:</p>`;
                             const commandInput = document.createElement('input');
                             commandInput.type = 'text';
                             commandInput.value = suggestion.newCommandName || '';
@@ -346,10 +342,9 @@
                             commandInput.dataset.id = key;
                             newCommandDiv.appendChild(commandInput);
                         } else {
-                            const commandDisplay = document.createElement('p');
-                            commandDisplay.className = 'command-name';
-                            commandDisplay.textContent = suggestion.newCommandName || '(няма зададена)';
-                            newCommandDiv.appendChild(commandDisplay);
+                            newCommandDiv.innerHTML = `
+                                <p class="label">Нова команда:</p>
+                                <p class="command-name">${suggestion.newCommandName || '(няма зададена)'}</p>`;
                         }
                         detailsDiv.appendChild(newCommandDiv);
                     }
@@ -428,6 +423,7 @@
                 }
             }, true);
 
+            // --- ЛОГИКА ЗА ФИЛТРИ И ПАДАЩИ ПАНЕЛИ ---
             const categoryFilter = document.getElementById('category-filter');
             const alphabetFilter = document.getElementById('alphabet-filter');
             const categories = document.querySelectorAll('.category');
