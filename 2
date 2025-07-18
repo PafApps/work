@@ -31,10 +31,12 @@
         #suggestions-list .status-toggle.is-done { background-color: #e6f4ea; color: #137333; }
         #suggestions-list .status-toggle.admin-enabled { cursor: pointer; }
         #suggestions-list .status-toggle:not(.admin-enabled) { cursor: not-allowed; opacity: 0.7; }
-        #alphabet-filter { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e1e1e1; }
+        .filters-container { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #e1e1e1; }
+        #category-filter, #alphabet-filter { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; }
         .filter-button { background-color: #a8dadc; color: #1d3557; border: none; border-radius: 4px; padding: 5px 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
-        .filter-button:hover { background-color: #457b9d; color: white; transform: translateY(-2px); }
-        .filter-button.active { background-color: #1d3557; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .category-filter-button { background-color: #a8dadc; color: #1d3557; border: none; border-radius: 5px; padding: 8px 14px; font-size: 15px; font-weight: bold; cursor: pointer; transition: background-color 0.3s, transform 0.2s; }
+        .filter-button:hover, .category-filter-button:hover { background-color: #457b9d; color: white; transform: translateY(-2px); }
+        .filter-button.active, .category-filter-button.active { background-color: #1d3557; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .category.hidden, .command-entry.hidden { display: none; }
         .command-entry { margin-bottom: 8px; border-radius: 6px; overflow: hidden; border: 1px solid #e9ecef; transition: box-shadow 0.3s; }
         .command-entry:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
@@ -44,7 +46,6 @@
         .short-description { margin-left: 20px; font-size: 15px; color: #555; flex-grow: 1; }
         .full-description-panel { max-height: 0; opacity: 0; overflow: hidden; background-color: #f1faee; color: #1d3557; box-sizing: border-box; transition: max-height 0.4s ease-out, opacity 0.3s ease-out, padding 0.4s ease-out; padding: 0 15px; border-top: 1px solid #e1e1e1; }
         .full-description-panel.show { max-height: 300px; opacity: 1; padding: 15px; transition: max-height 0.4s ease-in, opacity 0.3s ease-in, padding 0.4s ease-in; }
-        .full-description-panel p { margin: 0; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -61,9 +62,22 @@
         <h1>Интерактивен списък на AutoLISP команди</h1>
         <h3>Намерени общо 86 уникални команди, разпределени в категории</h3>
 
-        <div id="alphabet-filter">
-            <button class="filter-button active" data-filter="all">ВСИЧКИ</button>
-            <script>document.write(Array.from(Array(26)).map((e, i) => `<button class="filter-button" data-filter="${String.fromCharCode(i + 65)}">${String.fromCharCode(i + 65)}</button>`).join(''));</script>
+        <div class="filters-container">
+            <div id="category-filter">
+                <button class="category-filter-button active" data-filter="all">ВСИЧКИ СЕКЦИИ</button>
+                <button class="category-filter-button" data-filter="situation">Ситуация</button>
+                <button class="category-filter-button" data-filter="longitudinal-profiles">Надлъжни</button>
+                <button class="category-filter-button" data-filter="cross-sections">Напречни</button>
+                <button class="category-filter-button" data-filter="blocks">Блокове</button>
+                <button class="category-filter-button" data-filter="layouts">Layouts</button>
+                <button class="category-filter-button" data-filter="civil">Civil 3D</button>
+                <button class="category-filter-button" data-filter="registers">Регистри (Civil)</button>
+                <button class="category-filter-button" data-filter="other">Други</button>
+            </div>
+            <div id="alphabet-filter">
+                <button class="filter-button active" data-filter="all">ВСИЧКИ БУКВИ</button>
+                <script>document.write(Array.from(Array(26)).map((e, i) => `<button class="filter-button" data-filter="${String.fromCharCode(i + 65)}">${String.fromCharCode(i + 65)}</button>`).join(''));</script>
+            </div>
         </div>
         
         <div class="category" data-category="situation">
@@ -261,7 +275,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // <<< ВАШАТА FIREBASE КОНФИГУРАЦИЯ Е ПОСТАВЕНА ТУК >>>
+        // <<< ВАШАТА FIREBASE КОНФИГУРАЦИЯ ТУК >>>
         const firebaseConfig = {
           apiKey: "AIzaSyACB9shT_VTr3PGW_1nFjJCGAgwSI55Omw",
           authDomain: "clickcount-a6e46.firebaseapp.com",
@@ -384,40 +398,52 @@
             });
 
             // --- ЛОГИКА ЗА ФИЛТРИ И ПАДАЩИ ПАНЕЛИ ---
+            const categoryFilter = document.getElementById('category-filter');
             const alphabetFilter = document.getElementById('alphabet-filter');
             const categories = document.querySelectorAll('.category');
             const commandEntries = document.querySelectorAll('.command-entry');
             const commandHeaders = document.querySelectorAll('.command-header');
 
+            let activeCategory = 'all';
+            let activeLetter = 'all';
+
+            function applyFilters() {
+                commandEntries.forEach(entry => {
+                    const category = entry.closest('.category').dataset.category;
+                    const letter = entry.dataset.letter.toUpperCase();
+                    
+                    const isCategoryVisible = (activeCategory === 'all' || activeCategory === category);
+                    // --- КОРЕКЦИЯ: Тук беше грешката ---
+                    // Сравняваме с 'ALL' (главни букви), защото преобразуваме data-filter към главни букви.
+                    const isLetterVisible = (activeLetter === 'ALL' || activeLetter === letter);
+
+                    entry.classList.toggle('hidden', !(isCategoryVisible && isLetterVisible));
+                });
+
+                categories.forEach(category => {
+                    const visibleEntries = category.querySelectorAll('.command-entry:not(.hidden)');
+                    category.classList.toggle('hidden', visibleEntries.length === 0);
+                });
+            }
+
+            categoryFilter.addEventListener('click', function(e) {
+                const button = e.target.closest('.category-filter-button');
+                if (!button) return;
+
+                activeCategory = button.dataset.filter;
+                categoryFilter.querySelector('.active').classList.remove('active');
+                button.classList.add('active');
+                applyFilters();
+            });
+
             alphabetFilter.addEventListener('click', function(e) {
                 const button = e.target.closest('.filter-button');
                 if (!button) return;
-
-                const filter = button.dataset.filter.toUpperCase();
-
-                // Управление на активния бутон
+                
+                activeLetter = button.dataset.filter.toUpperCase();
                 alphabetFilter.querySelector('.active').classList.remove('active');
                 button.classList.add('active');
-
-                // Филтриране на командите
-                commandEntries.forEach(entry => {
-                    const letter = entry.dataset.letter.toUpperCase();
-                    if (filter === 'ALL' || letter === filter) {
-                        entry.classList.remove('hidden');
-                    } else {
-                        entry.classList.add('hidden');
-                    }
-                });
-
-                // Скриване на празни категории
-                categories.forEach(category => {
-                    const visibleEntries = category.querySelectorAll('.command-entry:not(.hidden)');
-                    if (visibleEntries.length === 0) {
-                        category.classList.add('hidden');
-                    } else {
-                        category.classList.remove('hidden');
-                    }
-                });
+                applyFilters();
             });
 
             commandHeaders.forEach(header => {
