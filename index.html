@@ -248,7 +248,7 @@
         </div>
     </div>
 
-           <!-- Модални прозорци за предложения -->
+             <!-- Модални прозорци за предложения -->
     <div id="suggestion-form-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">×</span>
@@ -408,6 +408,7 @@
             let currentCategoryFilter = 'all';
 
             const applyFilters = () => {
+                // Първа стъпка: Премини през всяка команда и реши дали да е видима
                 commandEntries.forEach(entry => {
                     const letter = entry.dataset.letter.toUpperCase();
                     const category = entry.closest('.category').dataset.category;
@@ -419,10 +420,13 @@
                     entry.style.display = (letterMatch && categoryMatch) ? '' : 'none';
                 });
                 
+                // Втора стъпка: Премини през всяка категория и я покажи, само ако има видими команди
                 categories.forEach(category => {
-                    // Проверяваме дали има видими деца след филтрирането
-                    const visibleEntries = category.querySelector('.command-entry:not([style*="display: none"])');
-                    category.style.display = visibleEntries ? '' : 'none';
+                    // Търсим дали има поне една видима команда вътре
+                    const hasVisibleCommands = category.querySelector('.command-entry:not([style*="display: none"])');
+                    
+                    // Покажи или скрий цялата категория
+                    category.style.display = hasVisibleCommands ? '' : 'none';
                 });
             };
 
